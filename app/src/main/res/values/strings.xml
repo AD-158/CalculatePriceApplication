@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Calculate the fair price of goods</string>
+    <string name="main_appbar_greeting_0">Good time of day!</string>
+    <string name="main_appbar_greeting_1">Good morning!</string>
+    <string name="main_appbar_greeting_2">Good afternoon!</string>
+    <string name="main_appbar_greeting_3">Good evening!</string>
+    <string name="main_appbar_greeting_4">Good evening!</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Расчет справделивой цены</string>
+    <string name="main_appbar_greeting_0">Доброго времени суток!</string>
+    <string name="main_appbar_greeting_1">Доброе утро!</string>
+    <string name="main_appbar_greeting_2">Добрый день!</string>
+    <string name="main_appbar_greeting_3">Добрый вечер!</string>
+    <string name="main_appbar_greeting_4">Доброй ночи!</string>
+</resources>
