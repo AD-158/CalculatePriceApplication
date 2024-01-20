@@ -5,4 +5,5 @@
     <string name="main_appbar_greeting_2">Good afternoon!</string>
     <string name="main_appbar_greeting_3">Good evening!</string>
     <string name="main_appbar_greeting_4">Good evening!</string>
+    <string name="nav_drawer_title">Your price comparison lists</string>
 </resources>
