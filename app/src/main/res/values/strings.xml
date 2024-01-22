@@ -6,4 +6,19 @@
     <string name="main_appbar_greeting_3">Good evening!</string>
     <string name="main_appbar_greeting_4">Good evening!</string>
     <string name="nav_drawer_title">Your price comparison lists</string>
+    <string name="nav_drawer_modal_action_0_title">Add new value</string>
+    <string name="nav_drawer_modal_action_1_title">Rename the value</string>
+    <string name="nav_drawer_modal_action_2_title">Delete the value</string>
+    <string name="nav_drawer_modal_action_0_approve">Add</string>
+    <string name="nav_drawer_modal_action_1_approve">Change</string>
+    <string name="nav_drawer_modal_action_2_approve">Delete</string>
+    <string name="nav_drawer_modal_action_0_input_value">Enter a name</string>
+    <string name="nav_drawer_modal_action_1_input_value">Enter a new name</string>
+    <string name="nav_drawer_modal_action_0_text">Add your new value to the input field above</string>
+    <string name="nav_drawer_modal_action_1_text">"Your previous title was: "</string>
+    <string name="nav_drawer_modal_action_2_text">"Are you sure you want to delete this item: "</string>
+    <string name="nav_drawer_modal_action_cancel_text">Cancel</string>
+    <string name="snackbar_text_action_0">The list has been added</string>
+    <string name="snackbar_text_action_1">The list has been renamed</string>
+    <string name="snackbar_text_action_2">The list has been deleted</string>
 </resources>

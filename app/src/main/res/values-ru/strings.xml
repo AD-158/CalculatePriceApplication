@@ -7,4 +7,19 @@
     <string name="main_appbar_greeting_3">Добрый вечер!</string>
     <string name="main_appbar_greeting_4">Доброй ночи!</string>
     <string name="nav_drawer_title">Ваши списки сравнения цен</string>
+    <string name="nav_drawer_modal_action_0_title">Добавить новый список</string>
+    <string name="nav_drawer_modal_action_1_title">Переименовать выбранный список</string>
+    <string name="nav_drawer_modal_action_2_title">Удалить выбранный список</string>
+    <string name="nav_drawer_modal_action_0_approve">Добавить</string>
+    <string name="nav_drawer_modal_action_1_approve">Изменить</string>
+    <string name="nav_drawer_modal_action_2_approve">Удалить</string>
+    <string name="nav_drawer_modal_action_0_input_value">Введите название</string>
+    <string name="nav_drawer_modal_action_1_input_value">Введите новое название...</string>
+    <string name="nav_drawer_modal_action_0_text">Добавьте название нового списка в поле выше</string>
+    <string name="nav_drawer_modal_action_1_text">"Ваше предыдущее название было: "</string>
+    <string name="nav_drawer_modal_action_2_text">"Вы уверены что хотите удалить этот элемент: "</string>
+    <string name="nav_drawer_modal_action_cancel_text">Отменить</string>
+    <string name="snackbar_text_action_0">Список был создан.</string>
+    <string name="snackbar_text_action_1">Список был переименован</string>
+    <string name="snackbar_text_action_2">Список был удален</string>
 </resources>
