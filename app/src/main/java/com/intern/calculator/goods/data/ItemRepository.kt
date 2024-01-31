@@ -12,9 +12,14 @@ interface ItemsRepository {
     fun getAllItemsStream(): Flow<List<Item>>
 
     /**
-     * Retrieve an item from the given data source that matches with the [id].
+     * Retrieve items from the given data source that matches with the [id].
      */
     fun getAllItemsForListSteam(id: Int): Flow<List<Item>>
+
+    /**
+     * Retrieve an item from the given data source that matches with the [id].
+     */
+    fun getItemStream(id: Int): Flow<Item?>
 
     /**
      * Insert item in the data source

@@ -25,16 +25,17 @@ import com.intern.calculator.goods.R
 
 @Composable
 fun CustomDialog(
-    openDialogCustom: MutableState<Boolean>,
     oldValue: String,
     neededAction: Int,
     onConfirmation: () -> Unit,
+    onCancel: () -> Unit,
 ) {
-    Dialog(onDismissRequest = { openDialogCustom.value = false }) {
+    Dialog(onDismissRequest = {}) {
         CustomDialogUI(
-            openDialogCustom = openDialogCustom, oldValue = oldValue,
+            oldValue = oldValue,
             neededAction = neededAction,
             onConfirmation = onConfirmation,
+            onCancel = onCancel,
         )
     }
 }
@@ -42,10 +43,10 @@ fun CustomDialog(
 @Composable
 fun CustomDialogUI(
     modifier: Modifier = Modifier,
-    openDialogCustom: MutableState<Boolean>,
     oldValue: String,
     neededAction: Int,
     onConfirmation: () -> Unit,
+    onCancel: () -> Unit,
 ) {
     var newValue by remember {
         mutableStateOf("")
@@ -111,7 +112,9 @@ fun CustomDialogUI(
                     .background(MaterialTheme.colorScheme.surface),
                 horizontalArrangement = Arrangement.SpaceAround,
             ) {
-                TextButton(onClick = { openDialogCustom.value = false }, Modifier.fillMaxWidth().weight(1f)) {
+                TextButton(onClick = {
+                    onCancel()
+                }, Modifier.fillMaxWidth().weight(1f)) {
                     Text(
                         text = stringResource(R.string.nav_drawer_modal_action_cancel_text),
                         fontWeight = FontWeight.Bold,
@@ -120,7 +123,6 @@ fun CustomDialogUI(
                     )
                 }
                 TextButton(onClick = {
-                    openDialogCustom.value = false
                     onConfirmation()
                 }, Modifier.fillMaxWidth().weight(1f)) {
                     Text(
