@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.intern.calculator.goods.R
 import com.intern.calculator.goods.ui.home.HomeDestination
 import com.intern.calculator.goods.ui.home.HomeScreen
 import com.intern.calculator.goods.ui.item.ItemDetailsDestination
@@ -41,7 +42,8 @@ fun GoodsNavHost(
             ItemEntryScreen(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() },
-                receivedVariable = it.arguments?.getInt("itemId") ?: 1
+                receivedVariable = it.arguments?.getInt("itemId") ?: 1,
+                buttonText = R.string.item_entry_save_button_text,
             )
         }
         composable(

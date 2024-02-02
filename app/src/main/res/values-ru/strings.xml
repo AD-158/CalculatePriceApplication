@@ -8,13 +8,13 @@
     <string name="main_appbar_greeting_4">Доброй ночи!</string>
     <string name="nav_drawer_title">Ваши списки сравнения цен</string>
     <string name="nav_drawer_modal_action_0_title">Добавить элемент</string>
-    <string name="nav_drawer_modal_action_1_title">Переименовать элемент</string>
+    <string name="nav_drawer_modal_action_1_title">Переименовать</string>
     <string name="nav_drawer_modal_action_2_title">Удалить элемент</string>
     <string name="nav_drawer_modal_action_0_approve">Добавить</string>
     <string name="nav_drawer_modal_action_1_approve">Изменить</string>
     <string name="nav_drawer_modal_action_2_approve">Удалить</string>
     <string name="nav_drawer_modal_action_0_input_value">Введите название</string>
-    <string name="nav_drawer_modal_action_1_input_value">Введите новое название...</string>
+    <string name="nav_drawer_modal_action_1_input_value">Введите новое название…</string>
     <string name="nav_drawer_modal_action_0_text">Добавьте новое название в поле выше</string>
     <string name="nav_drawer_modal_action_1_text">"Ваше предыдущее название было: "</string>
     <string name="nav_drawer_modal_action_2_text">"Вы уверены что хотите удалить этот элемент: "</string>
@@ -42,4 +42,5 @@
     <string name="quantity_type">Ед. измер.</string>
     <string name="first_list">Начальный список</string>
     <string name="home_top_card">"Имя списка - "</string>
+    <string name="price_per_kg_or_l">" за кг или литр"</string>
 </resources>

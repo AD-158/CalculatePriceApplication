@@ -1,11 +1,15 @@
 package com.intern.calculator.goods.ui.item
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.intern.calculator.goods.data.ItemsRepository
-import kotlinx.coroutines.flow.StateFlow
+import com.intern.calculator.goods.data.QuantityUnitRepository
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -17,9 +21,12 @@ import kotlinx.coroutines.launch
 class ItemDetailsViewModel(
     savedStateHandle: SavedStateHandle,
     private val itemsRepository: ItemsRepository,
+    private val quantityUnitRepository: QuantityUnitRepository,
 ) : ViewModel() {
 
     private val itemId: Int = checkNotNull(savedStateHandle[ItemDetailsDestination.itemIdArg])
+    var quantityUnitUiStates:List<QuantityUnitUiState> by mutableStateOf(emptyList())
+        private set
 
     /**
      * Holds the item details ui state. The data is retrieved from [ItemsRepository] and mapped to
@@ -36,15 +43,14 @@ class ItemDetailsViewModel(
                 initialValue = ItemDetailsUiState()
             )
 
-    /**
-     * Reduces the item quantity by one and update the [ItemsRepository]'s data source.
-     */
-    fun reduceQuantityByOne() {
+    init {
         viewModelScope.launch {
-            val currentItem = uiState.value.itemDetails.toItem()
-            if (currentItem.quantity > 0) {
-                itemsRepository.updateItem(currentItem.copy(quantity = currentItem.quantity - 1))
-            }
+            quantityUnitRepository.getAllQuantityUnitStream()
+                .collect { items ->
+                    if (items.isNotEmpty()) {
+                        quantityUnitUiStates = items.map { it.toQuantityUnitUiState() }
+                    }
+                }
         }
     }
 

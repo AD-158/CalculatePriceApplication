@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.intern.calculator.goods.data.ItemsRepository
+import com.intern.calculator.goods.data.QuantityUnitRepository
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -16,13 +17,16 @@ import kotlinx.coroutines.launch
  */
 class ItemEditViewModel(
     savedStateHandle: SavedStateHandle,
-    private val itemsRepository: ItemsRepository
+    private val itemsRepository: ItemsRepository,
+    private val quantityUnitRepository: QuantityUnitRepository,
 ) : ViewModel() {
 
     /**
      * Holds current item ui state
      */
     var itemUiState by mutableStateOf(ItemUiState())
+        private set
+    var quantityUnitUiStates:List<QuantityUnitUiState> by mutableStateOf(emptyList())
         private set
 
     private val itemId: Int = checkNotNull(savedStateHandle[ItemEditDestination.itemIdArg])
@@ -33,6 +37,10 @@ class ItemEditViewModel(
                 .filterNotNull()
                 .first()
                 .toItemUiState(true)
+            quantityUnitRepository.getAllQuantityUnitStream()
+                .collect { items ->
+                    quantityUnitUiStates = items.map { it.toQuantityUnitUiState() }
+                }
         }
     }
 

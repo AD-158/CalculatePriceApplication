@@ -86,6 +86,7 @@ fun ItemDetailsScreen(
     ) { innerPadding ->
         ItemDetailsBody(
             itemDetailsUiState = uiState.value,
+            quantityUnitUiState = viewModel.quantityUnitUiStates,
             onEdit = { navigateToEditItem(uiState.value.itemDetails.id) },
             onDelete = {
                 // Note: If the user rotates the screen very fast, the operation may get cancelled
@@ -108,6 +109,7 @@ fun ItemDetailsScreen(
 @Composable
 private fun ItemDetailsBody(
     itemDetailsUiState: ItemDetailsUiState,
+    quantityUnitUiState: List<QuantityUnitUiState>,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
@@ -121,7 +123,9 @@ private fun ItemDetailsBody(
     ) {
         var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
         ItemDetails(
-            item = itemDetailsUiState.itemDetails.toItem(), modifier = Modifier.fillMaxWidth()
+            item = itemDetailsUiState.itemDetails.toItem(),
+            quantityUnitUiState = quantityUnitUiState,
+            modifier = Modifier.fillMaxWidth(),
         )
         Button(
             onClick = onEdit,
@@ -167,44 +171,62 @@ private fun ItemDetailsBody(
 
 @Composable
 fun ItemDetails(
-    item: Item, modifier: Modifier = Modifier
+    quantityUnitUiState: List<QuantityUnitUiState>,
+    item: Item,
+    modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier, colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+    val context = LocalContext.current
+    if (quantityUnitUiState.isNotEmpty())
+    {
+        Card(
+            modifier = modifier, colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         ) {
-            ItemDetailsRow(
-                labelResID = R.string.item,
-                itemDetail = item.name,
-                modifier = Modifier.padding(
-                    horizontal = 0.dp
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                ItemDetailsRow(
+                    labelResID = R.string.item,
+                    itemDetail = item.name,
+                    modifier = Modifier.padding(
+                        horizontal = 0.dp
+                    )
                 )
-            )
-            ItemDetailsRow(
-                labelResID = R.string.quantity,
-                itemDetail = item.quantity.toString(),
-                modifier = Modifier.padding(
-                    horizontal = 0.dp
+                ItemDetailsRow(
+                    labelResID = R.string.quantity,
+                    itemDetail = item.quantity.toString(),
+                    modifier = Modifier.padding(
+                        horizontal = 0.dp
+                    )
                 )
-            )
-            ItemDetailsRow(
-                labelResID = R.string.price,
-                itemDetail = item.formatedPrice(),
-                modifier = Modifier.padding(
-                    horizontal = 0.dp
+                ItemDetailsRow(
+                    labelResID = R.string.quantity_type,
+                    itemDetail = context.getString(
+                        quantityUnitUiState
+                            .first { it.quantityUnitDetails.id == item.quantityType }
+                            .quantityUnitDetails.name
+                    ),
+                    modifier = Modifier.padding(
+                        horizontal = 0.dp
+                    )
                 )
-            )
-        }
+                ItemDetailsRow(
+                    labelResID = R.string.price,
+                    itemDetail = item.formatedPrice(),
+                    modifier = Modifier.padding(
+                        horizontal = 0.dp
+                    )
+                )
+            }
 
+        }
     }
+
 }
 
 @Composable

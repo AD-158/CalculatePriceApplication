@@ -15,24 +15,32 @@ object AppViewModelProvider {
     val Factory = viewModelFactory {
         // Initializer for HomeViewModel
         initializer {
-            HomeViewModel(CalculatePriceApplication().container.itemsRepository)
+            HomeViewModel(
+                CalculatePriceApplication().container.itemsRepository,
+                CalculatePriceApplication().container.quantityRepository,
+            )
         }
         // Initializer for ItemEntryViewModel
         initializer {
-            ItemEntryViewModel(CalculatePriceApplication().container.itemsRepository)
+            ItemEntryViewModel(
+                CalculatePriceApplication().container.itemsRepository,
+                CalculatePriceApplication().container.quantityRepository,
+            )
         }
         // Initializer for ItemDetailsViewModel
         initializer {
             ItemDetailsViewModel(
                 this.createSavedStateHandle(),
-                CalculatePriceApplication().container.itemsRepository
+                CalculatePriceApplication().container.itemsRepository,
+                CalculatePriceApplication().container.quantityRepository,
             )
         }
         // Initializer for ItemEditViewModel
         initializer {
             ItemEditViewModel(
                 this.createSavedStateHandle(),
-                CalculatePriceApplication().container.itemsRepository
+                CalculatePriceApplication().container.itemsRepository,
+                CalculatePriceApplication().container.quantityRepository,
             )
         }
     }

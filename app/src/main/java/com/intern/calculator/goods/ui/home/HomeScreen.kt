@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -66,8 +65,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.intern.calculator.goods.R
 import com.intern.calculator.goods.data.Item
+import com.intern.calculator.goods.data.QuantityUnit
 import com.intern.calculator.goods.ui.AppViewModelProvider
 import com.intern.calculator.goods.ui.components.MyTopAppBar
+import com.intern.calculator.goods.ui.item.formatedPrice
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -104,6 +105,8 @@ fun HomeScreen(
     // Выбранный элемент в меню
     var selectedItem by remember { mutableIntStateOf(1) }
     viewModel.updateItemListBasedOnId(selectedItem)
+
+    val quantityUnitList = viewModel.getQuantityUnitList()
 
     // Активация возможности изменить/удалить списки
     var couldChange by remember { mutableStateOf(false) }
@@ -353,6 +356,7 @@ fun HomeScreen(
             ) { innerPadding ->
                 HomeBody(
                     itemList = homeUiState.itemList,
+                    quantityUnitList = quantityUnitList,
                     onItemClick = navigateToItemUpdate,
                     listName = menuItems[selectedItem-1].name,
                     modifier = modifier
@@ -376,12 +380,12 @@ fun HomeScreen(
 @Composable
 private fun HomeBody(
     itemList: List<Item>,
+    quantityUnitList: List<QuantityUnit>,
     onItemClick: (Int) -> Unit,
     listName: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -418,8 +422,9 @@ private fun HomeBody(
         } else {
             InventoryList(
                 itemList = itemList,
+                quantityUnitList = quantityUnitList,
                 onItemClick = { onItemClick(it.id) },
-                modifier = Modifier.padding(horizontal = 8.dp)
+                modifier = Modifier.padding(horizontal = 0.dp),
             )
         }
     }
@@ -427,47 +432,85 @@ private fun HomeBody(
 
 @Composable
 private fun InventoryList(
-    itemList: List<Item>, onItemClick: (Item) -> Unit, modifier: Modifier = Modifier
+    itemList: List<Item>,
+    quantityUnitList: List<QuantityUnit>,
+    onItemClick: (Item) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    val best = itemList.minBy { item -> ((item.price/item.quantity)
+        *quantityUnitList.first { it.id == item.quantityType }.multiplier) }
     LazyColumn(modifier = modifier) {
         items(items = itemList, key = { it.id }) { item ->
-            InventoryItem(item = item,
+            InventoryItem(
+                item = item,
+                quantityUnitList = quantityUnitList,
                 modifier = Modifier
                     .padding(8.dp)
-                    .clickable { onItemClick(item) })
+                    .clickable { onItemClick(item) },
+                containerColor = if (item.id == best.id) {
+                    MaterialTheme.colorScheme.primary
+                }
+                else {
+
+                    MaterialTheme.colorScheme.surface
+                }
+            )
         }
     }
 }
 
 @Composable
 private fun InventoryItem(
-    item: Item, modifier: Modifier = Modifier
+    item: Item,
+    quantityUnitList: List<QuantityUnit>,
+    modifier: Modifier = Modifier,
+    containerColor: Color
 ) {
     Card(
         modifier = modifier,
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = containerColor,
+        ),
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(vertical = 20.dp, horizontal = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = item.name,
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                Spacer(Modifier.weight(1f))
-                Text(
-                    text = NumberFormat.getCurrencyInstance().format((item.price/item.quantity)).toString(),
-                    style = MaterialTheme.typography.titleLarge
-                )
-//                Text(
-//                    text = item.formatedPrice(),
-//                    style = MaterialTheme.typography.titleMedium
-//                )
+                Column (
+                    modifier = Modifier.weight(3f)
+                ) {
+                    Text(
+                        text = item.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+//                Spacer(Modifier.weight(1f))
+                Column (
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    Text(
+                        text = item.formatedPrice(),
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
+            Text(
+                text = NumberFormat.getCurrencyInstance().format(
+                    (item.price/item.quantity)
+                            *quantityUnitList.first { it.id == item.quantityType }.multiplier
+                ).toString() + stringResource(id = R.string.price_per_kg_or_l),
+                style = MaterialTheme.typography.titleMedium
+            )
         }
     }
 }

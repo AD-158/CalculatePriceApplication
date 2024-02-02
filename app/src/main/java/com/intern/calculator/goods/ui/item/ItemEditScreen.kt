@@ -8,14 +8,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.intern.calculator.goods.R
 import com.intern.calculator.goods.ui.AppViewModelProvider
 import com.intern.calculator.goods.ui.components.MyTopAppBar
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
-import com.intern.calculator.goods.ui.theme.GoodsTheme
 import kotlinx.coroutines.launch
 
 object ItemEditDestination : NavigationDestination {
@@ -34,6 +33,7 @@ fun ItemEditScreen(
     viewModel: ItemEditViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     Scaffold(
         topBar = {
             MyTopAppBar(
@@ -49,6 +49,7 @@ fun ItemEditScreen(
     ) { innerPadding ->
         ItemEntryBody(
             itemUiState = viewModel.itemUiState,
+            quantityUnitUiStates = viewModel.quantityUnitUiStates,
             onItemValueChange = viewModel::updateUiState,
             onSaveClick = {
                 // Note: If the user rotates the screen very fast, the operation may get cancelled
@@ -56,19 +57,25 @@ fun ItemEditScreen(
                 // change occurs, the Activity will be recreated and the rememberCoroutineScope will
                 // be cancelled - since the scope is bound to composition.
                 coroutineScope.launch {
+                    if ((viewModel.quantityUnitUiStates.firstOrNull {
+                            context.getString(it.quantityUnitDetails.name) ==
+                                    viewModel.itemUiState.itemDetails.quantityType
+                        }) != null) {
+                        viewModel.updateUiState(
+                            viewModel.itemUiState.itemDetails.copy(
+                                quantityType = viewModel.quantityUnitUiStates.first {
+                                    context.getString(it.quantityUnitDetails.name) ==
+                                            viewModel.itemUiState.itemDetails.quantityType
+                                }.quantityUnitDetails.id.toString()
+                            )
+                        )
+                    }
                     viewModel.updateItem()
                     navigateBack()
                 }
             },
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            buttonText = R.string.nav_drawer_modal_action_1_approve,
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ItemEditScreenPreview() {
-    GoodsTheme {
-        ItemEditScreen(navigateBack = { /*Do nothing*/ }, onNavigateUp = { /*Do nothing*/ })
     }
 }

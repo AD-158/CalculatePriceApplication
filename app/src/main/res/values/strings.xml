@@ -36,9 +36,10 @@
     <string name="delete_item">Delete this Item</string>
     <string name="edit_item">Edit this Item</string>
     <string name="price">Price</string>
-    <string name="quantity">Product quantity (weight or volume)</string>
+    <string name="quantity">Quantity (weight/volume)</string>
     <string name="item">Item</string>
     <string name="quantity_type">Quantity type</string>
     <string name="first_list">Default List</string>
     <string name="home_top_card">"Name of the list - "</string>
+    <string name="price_per_kg_or_l">" per kg or litre"</string>
 </resources>
