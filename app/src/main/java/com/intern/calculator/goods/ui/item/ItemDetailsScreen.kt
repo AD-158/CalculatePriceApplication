@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.intern.calculator.goods.R
 import com.intern.calculator.goods.data.Item
+import com.intern.calculator.goods.data.QuantityUnit
 import com.intern.calculator.goods.ui.AppViewModelProvider
 import com.intern.calculator.goods.ui.components.MyTopAppBar
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
@@ -68,6 +69,7 @@ fun ItemDetailsScreen(
     val coroutineScope = rememberCoroutineScope()
     // Открыт/закрыт диалог отмены изменений
     val snackbarHostState = remember { SnackbarHostState() }
+    val quantityUnitList = viewModel.getQuantityUnitList()
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -86,7 +88,7 @@ fun ItemDetailsScreen(
     ) { innerPadding ->
         ItemDetailsBody(
             itemDetailsUiState = uiState.value,
-            quantityUnitUiState = viewModel.quantityUnitUiStates,
+            quantityUnitList = quantityUnitList,
             onEdit = { navigateToEditItem(uiState.value.itemDetails.id) },
             onDelete = {
                 // Note: If the user rotates the screen very fast, the operation may get cancelled
@@ -109,7 +111,7 @@ fun ItemDetailsScreen(
 @Composable
 private fun ItemDetailsBody(
     itemDetailsUiState: ItemDetailsUiState,
-    quantityUnitUiState: List<QuantityUnitUiState>,
+    quantityUnitList: List<QuantityUnit>,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
@@ -124,7 +126,7 @@ private fun ItemDetailsBody(
         var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
         ItemDetails(
             item = itemDetailsUiState.itemDetails.toItem(),
-            quantityUnitUiState = quantityUnitUiState,
+            quantityUnitList = quantityUnitList,
             modifier = Modifier.fillMaxWidth(),
         )
         Button(
@@ -171,12 +173,12 @@ private fun ItemDetailsBody(
 
 @Composable
 fun ItemDetails(
-    quantityUnitUiState: List<QuantityUnitUiState>,
+    quantityUnitList: List<QuantityUnit>,
     item: Item,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    if (quantityUnitUiState.isNotEmpty())
+    if (quantityUnitList.isNotEmpty())
     {
         Card(
             modifier = modifier, colors = CardDefaults.cardColors(
@@ -207,9 +209,7 @@ fun ItemDetails(
                 ItemDetailsRow(
                     labelResID = R.string.quantity_type,
                     itemDetail = context.getString(
-                        quantityUnitUiState
-                            .first { it.quantityUnitDetails.id == item.quantityType }
-                            .quantityUnitDetails.name
+                        quantityUnitList.first{ it.id == item.quantityType }.name
                     ),
                     modifier = Modifier.padding(
                         horizontal = 0.dp

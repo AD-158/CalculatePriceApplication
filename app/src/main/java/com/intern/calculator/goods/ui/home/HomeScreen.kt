@@ -486,7 +486,7 @@ private fun InventoryItem(
                     Text(
                         text = item.name,
                         style = MaterialTheme.typography.titleLarge,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }

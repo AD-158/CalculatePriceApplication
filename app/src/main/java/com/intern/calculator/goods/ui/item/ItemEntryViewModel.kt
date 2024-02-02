@@ -1,5 +1,7 @@
 package com.intern.calculator.goods.ui.item
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,28 +11,27 @@ import com.intern.calculator.goods.data.Item
 import com.intern.calculator.goods.data.ItemsRepository
 import com.intern.calculator.goods.data.QuantityUnit
 import com.intern.calculator.goods.data.QuantityUnitRepository
-import kotlinx.coroutines.launch
+import com.intern.calculator.goods.ui.home.QuantityUnitUiState
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import java.text.NumberFormat
 
 class ItemEntryViewModel(
     private val itemsRepository: ItemsRepository,
-    private val quantityUnitRepository: QuantityUnitRepository
+    quantityUnitRepository: QuantityUnitRepository
 ) : ViewModel() {
     var itemUiState by mutableStateOf(ItemUiState())
         private set
-    var quantityUnitUiStates:List<QuantityUnitUiState> by mutableStateOf(emptyList())
-        private set
 
-    init {
-        viewModelScope.launch {
-            quantityUnitRepository.getAllQuantityUnitStream()
-                .collect { items ->
-                    if (items.isNotEmpty()) {
-                        quantityUnitUiStates = items.map { it.toQuantityUnitUiState() }
-                    }
-                }
-        }
-    }
+    private val quantityUnitUiState: StateFlow<QuantityUnitUiState> =
+        quantityUnitRepository.getAllQuantityUnitStream().map { QuantityUnitUiState(it) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = QuantityUnitUiState()
+            )
 
     fun updateUiState(itemDetails: ItemDetails) {
         itemUiState =
@@ -49,6 +50,15 @@ class ItemEntryViewModel(
             price.isNotBlank()
                     && quantity.isNotBlank()
         }
+    }
+
+    @Composable
+    fun getQuantityUnitList(): List<QuantityUnit> {
+        return quantityUnitUiState.collectAsState().value.quantityUnitList
+    }
+
+    companion object {
+        private const val TIMEOUT_MILLIS = 5_000L
     }
 }
 
@@ -91,24 +101,4 @@ fun Item.toItemDetails(): ItemDetails = ItemDetails(
     quantity = quantity.toString(),
     aList = aList.toString(),
     quantityType = quantityType.toString()
-)
-
-data class QuantityUnitUiState(
-    val quantityUnitDetails: QuantityUnitDetails = QuantityUnitDetails(),
-)
-
-data class QuantityUnitDetails(
-    val id: Int = 0,
-    val name: Int = 0,
-    val multiplier: Int = 0,
-)
-
-fun QuantityUnit.toQuantityUnitUiState(): QuantityUnitUiState = QuantityUnitUiState(
-    quantityUnitDetails = this.toQuantityUnitDetails(),
-)
-
-fun QuantityUnit.toQuantityUnitDetails(): QuantityUnitDetails = QuantityUnitDetails(
-    id = id,
-    name = name,
-    multiplier = multiplier,
 )

@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.intern.calculator.goods.R
+import com.intern.calculator.goods.data.QuantityUnit
 import com.intern.calculator.goods.ui.AppViewModelProvider
 import com.intern.calculator.goods.ui.components.MyTopAppBar
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
@@ -59,6 +60,7 @@ fun ItemEntryScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val quantityUnitList = viewModel.getQuantityUnitList()
     Scaffold(
         topBar = {
             MyTopAppBar(
@@ -73,7 +75,7 @@ fun ItemEntryScreen(
     ) { innerPadding ->
         ItemEntryBody(
             itemUiState = viewModel.itemUiState,
-            quantityUnitUiStates = viewModel.quantityUnitUiStates,
+            quantityUnitList = quantityUnitList,
             onItemValueChange = viewModel::updateUiState,
             onSaveClick = {
                 coroutineScope.launch {
@@ -81,10 +83,10 @@ fun ItemEntryScreen(
                         viewModel.itemUiState.itemDetails.copy(
                             aList = receivedVariable.toString(),
                             quantityType =
-                            viewModel.quantityUnitUiStates.first {
-                                context.getString(it.quantityUnitDetails.name) ==
+                            quantityUnitList.first {
+                                context.getString(it.name) ==
                                         viewModel.itemUiState.itemDetails.quantityType
-                            }.quantityUnitDetails.id.toString()
+                            }.id.toString()
                         )
                     )
 
@@ -104,7 +106,7 @@ fun ItemEntryScreen(
 @Composable
 fun ItemEntryBody(
     itemUiState: ItemUiState,
-    quantityUnitUiStates: List<QuantityUnitUiState>,
+    quantityUnitList: List<QuantityUnit>,
     onItemValueChange: (ItemDetails) -> Unit,
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -116,7 +118,7 @@ fun ItemEntryBody(
     ) {
         ItemInputForm(
             itemDetails = itemUiState.itemDetails,
-            quantityUnits = quantityUnitUiStates.map { it.quantityUnitDetails },
+            quantityUnitList = quantityUnitList,
             onValueChange = onItemValueChange,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -135,13 +137,13 @@ fun ItemEntryBody(
 @Composable
 fun ItemInputForm(
     itemDetails: ItemDetails,
-    quantityUnits: List<QuantityUnitDetails>,
+    quantityUnitList: List<QuantityUnit>,
     modifier: Modifier = Modifier,
     onValueChange: (ItemDetails) -> Unit = {},
     enabled: Boolean = true,
 ) {
     val context = LocalContext.current
-    val options = quantityUnits.map { context.getString(it.name) }
+    val options = quantityUnitList.map { context.getString(it.name) }
     if (options.isNotEmpty()) {
         var expanded by remember { mutableStateOf(false) }
         var selectedOptionText by remember { mutableStateOf(
@@ -256,10 +258,10 @@ fun ItemInputForm(
                             }
                             else {
                                 context.getString(
-                                    quantityUnits.firstOrNull() {
+                                    quantityUnitList.firstOrNull() {
                                         context.getString(it.name) ==
                                                 itemDetails.quantityType}?.name ?:
-                                                quantityUnits.first {
+                                                quantityUnitList.first {
                                                     (it.id) == itemDetails.quantityType.toInt()}.name
                                 )
                             },

@@ -34,6 +34,7 @@ fun ItemEditScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val quantityUnitList = viewModel.getQuantityUnitList()
     Scaffold(
         topBar = {
             MyTopAppBar(
@@ -49,7 +50,7 @@ fun ItemEditScreen(
     ) { innerPadding ->
         ItemEntryBody(
             itemUiState = viewModel.itemUiState,
-            quantityUnitUiStates = viewModel.quantityUnitUiStates,
+            quantityUnitList = quantityUnitList,
             onItemValueChange = viewModel::updateUiState,
             onSaveClick = {
                 // Note: If the user rotates the screen very fast, the operation may get cancelled
@@ -57,16 +58,16 @@ fun ItemEditScreen(
                 // change occurs, the Activity will be recreated and the rememberCoroutineScope will
                 // be cancelled - since the scope is bound to composition.
                 coroutineScope.launch {
-                    if ((viewModel.quantityUnitUiStates.firstOrNull {
-                            context.getString(it.quantityUnitDetails.name) ==
+                    if ((quantityUnitList.firstOrNull {
+                            context.getString(it.name) ==
                                     viewModel.itemUiState.itemDetails.quantityType
                         }) != null) {
                         viewModel.updateUiState(
                             viewModel.itemUiState.itemDetails.copy(
-                                quantityType = viewModel.quantityUnitUiStates.first {
-                                    context.getString(it.quantityUnitDetails.name) ==
+                                quantityType = quantityUnitList.first {
+                                    context.getString(it.name) ==
                                             viewModel.itemUiState.itemDetails.quantityType
-                                }.quantityUnitDetails.id.toString()
+                                }.id.toString()
                             )
                         )
                     }

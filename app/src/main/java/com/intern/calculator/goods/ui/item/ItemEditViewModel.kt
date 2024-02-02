@@ -1,5 +1,7 @@
 package com.intern.calculator.goods.ui.item
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -7,29 +9,35 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.intern.calculator.goods.data.ItemsRepository
+import com.intern.calculator.goods.data.QuantityUnit
 import com.intern.calculator.goods.data.QuantityUnitRepository
+import com.intern.calculator.goods.ui.home.QuantityUnitUiState
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel to retrieve and update an item from the [ItemsRepository]'s data source.
- */
 class ItemEditViewModel(
     savedStateHandle: SavedStateHandle,
     private val itemsRepository: ItemsRepository,
-    private val quantityUnitRepository: QuantityUnitRepository,
+    quantityUnitRepository: QuantityUnitRepository,
 ) : ViewModel() {
 
-    /**
-     * Holds current item ui state
-     */
     var itemUiState by mutableStateOf(ItemUiState())
-        private set
-    var quantityUnitUiStates:List<QuantityUnitUiState> by mutableStateOf(emptyList())
         private set
 
     private val itemId: Int = checkNotNull(savedStateHandle[ItemEditDestination.itemIdArg])
+
+    private val quantityUnitUiState: StateFlow<QuantityUnitUiState> =
+        quantityUnitRepository.getAllQuantityUnitStream().map { QuantityUnitUiState(it) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = QuantityUnitUiState()
+            )
 
     init {
         viewModelScope.launch {
@@ -37,26 +45,15 @@ class ItemEditViewModel(
                 .filterNotNull()
                 .first()
                 .toItemUiState(true)
-            quantityUnitRepository.getAllQuantityUnitStream()
-                .collect { items ->
-                    quantityUnitUiStates = items.map { it.toQuantityUnitUiState() }
-                }
         }
     }
 
-    /**
-     * Update the item in the [ItemsRepository]'s data source
-     */
     suspend fun updateItem() {
         if (validateInput(itemUiState.itemDetails)) {
             itemsRepository.updateItem(itemUiState.itemDetails.toItem())
         }
     }
 
-    /**
-     * Updates the [itemUiState] with the value provided in the argument. This method also triggers
-     * a validation for input values.
-     */
     fun updateUiState(itemDetails: ItemDetails) {
         itemUiState =
             ItemUiState(itemDetails = itemDetails, isEntryValid = validateInput(itemDetails))
@@ -67,5 +64,14 @@ class ItemEditViewModel(
 //            name.isNotBlank() &&
                     price.isNotBlank() && quantity.isNotBlank()
         }
+    }
+
+    @Composable
+    fun getQuantityUnitList(): List<QuantityUnit> {
+        return quantityUnitUiState.collectAsState().value.quantityUnitList
+    }
+
+    companion object {
+        private const val TIMEOUT_MILLIS = 5_000L
     }
 }
