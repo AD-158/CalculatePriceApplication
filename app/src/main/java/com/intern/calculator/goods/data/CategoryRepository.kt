@@ -6,7 +6,7 @@ interface CategoryRepository {
 
     fun getAllCategoriesStream(): Flow<List<Category>>
 
-    fun getCategoryStream(id: Int): Flow<Category?>
+    fun getCategoryStream(name: String): Flow<Category?>
 
     suspend fun insertCategory(category: Category)
 

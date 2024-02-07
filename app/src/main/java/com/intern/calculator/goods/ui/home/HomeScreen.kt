@@ -1,6 +1,6 @@
 package com.intern.calculator.goods.ui.home
 
-import CustomDialog
+import com.intern.calculator.goods.ui.components.CustomDialog
 import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -24,6 +24,7 @@ import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,6 +46,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -64,24 +66,26 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.intern.calculator.goods.R
+import com.intern.calculator.goods.data.Category
 import com.intern.calculator.goods.data.Item
 import com.intern.calculator.goods.data.QuantityUnit
 import com.intern.calculator.goods.ui.AppViewModelProvider
+import com.intern.calculator.goods.ui.components.MyNavigationDrawerTitle
 import com.intern.calculator.goods.ui.components.MyTopAppBar
 import com.intern.calculator.goods.ui.item.formatedPrice
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.lang.Exception
 import java.text.NumberFormat
-
 
 object HomeDestination : NavigationDestination {
     override val route = "home"
     override val titleRes = R.string.app_name
 }
 
-/**
- * Entry route for Home screen
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -99,32 +103,35 @@ fun HomeScreen(
     val homeUiState by viewModel.homeUiState.collectAsState()
     val context = LocalContext.current
 
-    // dummy list of menu items for example
-    val menuItems: List<CountdownMenu> = MenuItems()
+    var menuItems = viewModel.getCategoryList()
 
     // Выбранный элемент в меню
     var selectedItem by remember { mutableIntStateOf(1) }
     viewModel.updateItemListBasedOnId(selectedItem)
-
-    val quantityUnitList = viewModel.getQuantityUnitList()
+    var quantityUnitList = viewModel.getQuantityUnitList()
 
     // Активация возможности изменить/удалить списки
     var couldChange by remember { mutableStateOf(false) }
     var couldDelete by remember { mutableStateOf(false) }
     // Значение, передающееся в модальное окно для изменения/удаления
     var oldValue by remember { mutableStateOf("Test") }
+    var newValue by remember { mutableStateOf("Test") }
     // Значение, передающееся в модальное окно для выбора действия
     var modalAction by remember { mutableIntStateOf(0) }
     // Открыт/закрыт диалог изменения удаления
     val openDialogCustom = remember { mutableStateOf(false) }
     // Открыт/закрыт диалог отмены изменений
     val snackbarHostState = remember { SnackbarHostState() }
+
+    var needReload by remember { mutableStateOf(false) }
+
     // Вызов диалога изменения/удаления
     if (openDialogCustom.value) {
         CustomDialog(
             oldValue = oldValue,
             neededAction = modalAction,
             onConfirmation = {
+                data-> newValue = data
                 openDialogCustom.value = false
                 scope.launch {
                     drawerState.apply { close() }
@@ -136,17 +143,49 @@ fun HomeScreen(
                                 else -> context.getString(R.string.snackbar_text_action_2)
                             },
                             actionLabel = context.getString(R.string.nav_drawer_modal_action_cancel_text),
-                            // Defaults to SnackbarDuration.Short
                             duration = SnackbarDuration.Short
                         )
                     when (result) {
                         SnackbarResult.ActionPerformed -> {
-                            /* Handle snackbar action performed */
-                            drawerState.apply { open()  } // TODO: Добавить логику
+                            drawerState.apply { open()  }
                         }
-
                         SnackbarResult.Dismissed -> {
-                            /* Handle snackbar dismissed */
+                            when (modalAction) {
+                                0 -> {
+                                    viewModel.createCategory(
+                                        Category(
+                                            name = newValue
+                                        )
+                                    )
+                                }
+                                1 -> {
+                                    viewModel.updateCategory(
+                                        Category(
+                                            id = menuItems.first { it.name == oldValue }.id,
+                                            name = newValue
+                                        )
+                                    )
+                                }
+                                else -> {
+                                    viewModel.deleteCategory(menuItems.first { it.name == oldValue })
+                                    menuItems.toMutableList().apply {
+                                        removeIf { it.id == (
+                                                menuItems.first { item -> item.name == oldValue }.id) }
+                                    }
+                                    if (selectedItem == (menuItems.first { it.name == oldValue }.id)) {
+                                        selectedItem = ((menuItems.first().id))
+                                    }
+                                    if (menuItems.isEmpty()) {
+                                        viewModel.createCategory(
+                                            Category(
+                                                id = 0,
+                                                name = context.getString(R.string.first_list)
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                            needReload = true
                             drawerState.apply { open() }
                         }
                     }
@@ -157,179 +196,228 @@ fun HomeScreen(
             }
         )
     }
-    MaterialTheme {
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                ModalDrawerSheet(
-                    drawerShape = RectangleShape,
-                    drawerTonalElevation = Dp(1F),
-                    content = {
-                        // Заголовок
-                        MyNavigationDrawerTitle(
-                            title = context.getString(R.string.nav_drawer_title),
-                            drawerState = drawerState
-                        )
-                        // Разделялка
-                        Divider()
-                        // Двигаемый список
-                        Column {
-                            LazyColumn(Modifier.weight(1f)) {
-                                items(menuItems) { item ->
-                                    // Каким будет каждый элемент
-                                    NavigationDrawerItem(
-                                        label = { Text(item.name) },
-                                        selected = item.index == selectedItem,
-                                        onClick = {
-                                            selectedItem = item.index
-                                            scope.launch { drawerState.close() }
-                                        },
-                                        badge = {
-                                            // Изменить
-                                            if (couldChange) {
-                                                IconButton(
-                                                    onClick = {
-                                                        oldValue = item.name
-                                                        openDialogCustom.value =
-                                                            true
-                                                        modalAction = 1
-                                                    },
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Filled.Edit,
-                                                        contentDescription = "Close Navbar Drawer",
-                                                        tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                                    )
-                                                }
-                                            }
-                                            // Удалить
-                                            if (couldDelete) {
-                                                IconButton(
-                                                    onClick = {
-                                                        oldValue = item.name
-                                                        openDialogCustom.value =
-                                                            true
-                                                        modalAction = 2
-                                                    },
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Filled.Delete,
-                                                        contentDescription = "Close Navbar Drawer",
-                                                        tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                            // Нижняя закрепленная строчка
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp)
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .padding(top = 4.dp)
+
+    if (needReload) {
+        menuItems = viewModel.getCategoryList()
+        needReload = false
+    }
+
+    if (menuItems.isNotEmpty() and quantityUnitList.isNotEmpty()) {
+        MaterialTheme {
+            ModalNavigationDrawer(
+                drawerState = drawerState,
+                drawerContent = {
+                    ModalDrawerSheet(
+                        drawerShape = RectangleShape,
+                        drawerTonalElevation = Dp(1F),
+                        content = {
+                            // Заголовок
+                            MyNavigationDrawerTitle(
+                                title = context.getString(R.string.nav_drawer_title),
+                                drawerState = drawerState
                             )
-                            {
-                                Row(
+                            // Разделялка
+                            Divider()
+                            // Двигаемый список
+                            Column {
+                                LazyColumn(
+                                    Modifier
+                                        .weight(1f)
+                                        .padding(8.dp)) {
+                                    items(menuItems) { item ->
+                                        // Каким будет каждый элемент
+                                        NavigationDrawerItem(
+                                            label = { Text(item.name) },
+                                            selected = item.id ==
+                                                    if (menuItems.firstOrNull { it.id == selectedItem } != null)
+                                                        selectedItem
+                                                    else {
+                                                         menuItems.first().id
+                                                    },
+                                            onClick = {
+                                                selectedItem = item.id
+                                                scope.launch { drawerState.close() }
+                                            },
+                                            badge = {
+                                                // Изменить
+                                                if (couldChange) {
+                                                    IconButton(
+                                                        onClick = {
+                                                            oldValue = item.name
+                                                            openDialogCustom.value =
+                                                                true
+                                                            modalAction = 1
+                                                        },
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Filled.Edit,
+                                                            contentDescription = "Close Navbar Drawer",
+                                                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                                        )
+                                                    }
+                                                }
+                                                // Удалить
+                                                if (couldDelete) {
+                                                    IconButton(
+                                                        onClick = {
+                                                            oldValue = item.name
+                                                            openDialogCustom.value =
+                                                                true
+                                                            modalAction = 2
+                                                        },
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Filled.Delete,
+                                                            contentDescription = "Close Navbar Drawer",
+                                                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                                // Нижняя закрепленная строчка
+                                Box(
                                     Modifier
                                         .fillMaxWidth()
-                                        .padding(start = 8.dp, end = 8.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    // Добавить
-                                    Column(Modifier.weight(1f)) {
-                                        OutlinedButton(
-                                            onClick = {
-                                                oldValue = ""
-                                                openDialogCustom.value =
-                                                    true
-                                                modalAction = 0
-                                            },
-                                            contentPadding = PaddingValues(
-                                                start = 8.dp,
-                                                end = 8.dp
-                                            ),
-                                            modifier = Modifier.fillMaxWidth()
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Add,
-                                                contentDescription = "Close Navbar Drawer",
-                                                tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                            )
-                                            Text(
-                                                context.getString(R.string.nav_drawer_modal_action_0_approve),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
+                                        .height(56.dp)
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .padding(top = 4.dp)
+                                )
+                                {
+                                    Row(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 8.dp, end = 8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        // Добавить
+                                        Column(Modifier.weight(1f)) {
+                                            OutlinedButton(
+                                                onClick = {
+                                                    oldValue = ""
+                                                    openDialogCustom.value =
+                                                        true
+                                                    modalAction = 0
+                                                },
+                                                contentPadding = PaddingValues(
+                                                    start = 8.dp,
+                                                    end = 8.dp
+                                                ),
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Add,
+                                                    contentDescription = "Close Navbar Drawer",
+                                                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                                )
+                                                Text(
+                                                    context.getString(R.string.nav_drawer_modal_action_0_approve),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
                                         }
-                                    }
-                                    // Изменить
-                                    Column(Modifier.weight(1f)) {
-                                        OutlinedButton(
-                                            onClick = {
-                                                couldChange = !couldChange
-                                            },
-                                            contentPadding = PaddingValues(
-                                                start = 8.dp,
-                                                end = 8.dp
-                                            ),
-                                            modifier = Modifier.fillMaxWidth()
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Edit,
-                                                contentDescription = "Close Navbar Drawer",
-                                                tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                            )
-                                            Text(
-                                                context.getString(R.string.nav_drawer_modal_action_1_approve),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
+                                        // Изменить
+                                        Column(Modifier.weight(1f)) {
+                                            OutlinedButton(
+                                                onClick = {
+                                                    couldChange = !couldChange
+                                                },
+                                                contentPadding = PaddingValues(
+                                                    start = 8.dp,
+                                                    end = 8.dp
+                                                ),
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Edit,
+                                                    contentDescription = "Close Navbar Drawer",
+                                                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                                )
+                                                Text(
+                                                    context.getString(R.string.nav_drawer_modal_action_1_approve),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
                                         }
-                                    }
-                                    // Удалить
-                                    Column(Modifier.weight(1f)) {
-                                        OutlinedButton(
-                                            onClick = {
-                                                couldDelete = !couldDelete
-                                            },
-                                            contentPadding = PaddingValues(
-                                                start = 8.dp,
-                                                end = 8.dp
-                                            ),
-                                            modifier = Modifier.fillMaxWidth()
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Delete,
-                                                contentDescription = "Close Navbar Drawer",
-                                                tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                            )
-                                            Text(
-                                                context.getString(R.string.nav_drawer_modal_action_2_approve),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
+                                        // Удалить
+                                        Column(Modifier.weight(1f)) {
+                                            OutlinedButton(
+                                                onClick = {
+                                                    couldDelete = !couldDelete
+                                                },
+                                                contentPadding = PaddingValues(
+                                                    start = 8.dp,
+                                                    end = 8.dp
+                                                ),
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Delete,
+                                                    contentDescription = "Close Navbar Drawer",
+                                                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                                )
+                                                Text(
+                                                    context.getString(R.string.nav_drawer_modal_action_2_approve),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                )
-            },
-            gesturesEnabled = true,
-        ) {
-            Scaffold(
-                topBar = {
-                    MyTopAppBar(
-                        title = null,
-                        navigationIcon = Icons.Outlined.Menu,
-                        navigationIconContentDescription = "Navigation icon",
-                        actionIcon = Icons.Outlined.Settings,
-                        actionIconContentDescription = "Action icon",
-                        onNavigationClick = {
+                    )
+                },
+                gesturesEnabled = true,
+            ) {
+                Scaffold(
+                    topBar = {
+                        MyTopAppBar(
+                            title = null,
+                            navigationIcon = Icons.Outlined.Menu,
+                            navigationIconContentDescription = "Navigation icon",
+                            actionIcon = Icons.Outlined.Settings,
+                            actionIconContentDescription = "Action icon",
+                            onNavigationClick = {
+                                scope.launch {
+                                    drawerState.apply {
+                                        if (isClosed) open() else close()
+                                    }
+                                }
+                            }
+                        )
+                    },
+                    snackbarHost = {
+                        SnackbarHost(hostState = snackbarHostState)
+                    },
+                    floatingActionButton = {
+                        FloatingActionButton(
+                            onClick = { navigateToItemEntry(selectedItem) },
+                            shape = MaterialTheme.shapes.medium,
+                            modifier = Modifier.padding(20.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(R.string.item_entry_title)
+                            )
+                        }
+                    },
+                ) { innerPadding ->
+                    HomeBody(
+                        itemList = homeUiState.itemList,
+                        quantityUnitList = quantityUnitList,
+                        onItemClick = navigateToItemUpdate,
+                        listName = menuItems.firstOrNull { it.id == (selectedItem) }?.name ?: menuItems.first().name,
+                        modifier = modifier
+                            .padding(innerPadding)
+                            .padding(4.dp)
+                            .fillMaxSize(),
+                        onClick = {
                             scope.launch {
                                 drawerState.apply {
                                     if (isClosed) open() else close()
@@ -337,43 +425,22 @@ fun HomeScreen(
                             }
                         }
                     )
-                },
-                snackbarHost = {
-                    SnackbarHost(hostState = snackbarHostState)
-                },
-                floatingActionButton = {
-                    FloatingActionButton(
-                        onClick = { navigateToItemEntry(selectedItem) },
-                        shape = MaterialTheme.shapes.medium,
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = stringResource(R.string.item_entry_title)
-                        )
-                    }
-                },
-            ) { innerPadding ->
-                HomeBody(
-                    itemList = homeUiState.itemList,
-                    quantityUnitList = quantityUnitList,
-                    onItemClick = navigateToItemUpdate,
-                    listName = menuItems[selectedItem-1].name,
-                    modifier = modifier
-                        .padding(innerPadding)
-                        .padding(4.dp)
-                        .fillMaxSize(),
-                    onClick = {
-                        scope.launch {
-                            drawerState.apply {
-                                if (isClosed) open() else close()
-                            }
-                        }
-                    }
-                )
+                }
             }
         }
     }
+    else {
+        menuItems = viewModel.getCategoryList()
+        quantityUnitList = viewModel.getQuantityUnitList()
+        Column (
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            ) {
+            CircularProgressIndicator()
+        }
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -513,17 +580,4 @@ private fun InventoryItem(
             )
         }
     }
-}
-
-class CountdownMenu(index: Int, name: String) {
-    var index: Int = index
-    var name: String = name
-}
-
-fun MenuItems(): List<CountdownMenu> {
-    val menuItems = mutableListOf<CountdownMenu>()
-    for (i in 1..26) {
-        menuItems.add(CountdownMenu(i, "Kolbasa Pyaterochka " + i))
-    }
-    return menuItems
 }

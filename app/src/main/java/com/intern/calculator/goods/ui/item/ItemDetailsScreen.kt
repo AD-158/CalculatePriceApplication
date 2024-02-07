@@ -1,11 +1,11 @@
 package com.intern.calculator.goods.ui.item
 
-import CustomDialog
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -17,6 +17,7 @@ import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -46,6 +48,7 @@ import com.intern.calculator.goods.R
 import com.intern.calculator.goods.data.Item
 import com.intern.calculator.goods.data.QuantityUnit
 import com.intern.calculator.goods.ui.AppViewModelProvider
+import com.intern.calculator.goods.ui.components.CustomDialog
 import com.intern.calculator.goods.ui.components.MyTopAppBar
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
@@ -69,42 +72,53 @@ fun ItemDetailsScreen(
     val coroutineScope = rememberCoroutineScope()
     // Открыт/закрыт диалог отмены изменений
     val snackbarHostState = remember { SnackbarHostState() }
-    val quantityUnitList = viewModel.getQuantityUnitList()
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
-        topBar = {
-            MyTopAppBar(
-                title = stringResource(ItemDetailsDestination.titleRes),
-                navigationIcon = Icons.Outlined.ArrowBack,
-                navigationIconContentDescription = "Navigate back",
-                actionIcon = null,
-                actionIconContentDescription = null,
-                onNavigationClick = navigateBack
-            )
-        },
-        modifier = modifier
-    ) { innerPadding ->
-        ItemDetailsBody(
-            itemDetailsUiState = uiState.value,
-            quantityUnitList = quantityUnitList,
-            onEdit = { navigateToEditItem(uiState.value.itemDetails.id) },
-            onDelete = {
-                // Note: If the user rotates the screen very fast, the operation may get cancelled
-                // and the item may not be deleted from the Database. This is because when config
-                // change occurs, the Activity will be recreated and the rememberCoroutineScope will
-                // be cancelled - since the scope is bound to composition.
-                coroutineScope.launch {
-                    viewModel.deleteItem()
-                    navigateBack()
-                }
+    var quantityUnitList = viewModel.getQuantityUnitList()
+    if (quantityUnitList.isNotEmpty()) {
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState)
             },
-            modifier = Modifier
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState()),
-            snackbarHostState = snackbarHostState,
-        )
+            topBar = {
+                MyTopAppBar(
+                    title = stringResource(ItemDetailsDestination.titleRes),
+                    navigationIcon = Icons.Outlined.ArrowBack,
+                    navigationIconContentDescription = "Navigate back",
+                    actionIcon = null,
+                    actionIconContentDescription = null,
+                    onNavigationClick = navigateBack
+                )
+            },
+            modifier = modifier
+        ) { innerPadding ->
+            ItemDetailsBody(
+                itemDetailsUiState = uiState.value,
+                quantityUnitList = quantityUnitList,
+                onEdit = { navigateToEditItem(uiState.value.itemDetails.id) },
+                onDelete = {
+                    // Note: If the user rotates the screen very fast, the operation may get cancelled
+                    // and the item may not be deleted from the Database. This is because when config
+                    // change occurs, the Activity will be recreated and the rememberCoroutineScope will
+                    // be cancelled - since the scope is bound to composition.
+                    coroutineScope.launch {
+                        viewModel.deleteItem()
+                        navigateBack()
+                    }
+                },
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState()),
+                snackbarHostState = snackbarHostState,
+            )
+        }
+    } else {
+        quantityUnitList = viewModel.getQuantityUnitList()
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            CircularProgressIndicator()
+        }
     }
 }
 
@@ -144,7 +158,7 @@ private fun ItemDetailsBody(
             onClick = {
                 deleteConfirmationRequired = true
                 openDialogCustom.value = true
-                      },
+            },
             shape = MaterialTheme.shapes.small,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -178,55 +192,52 @@ fun ItemDetails(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    if (quantityUnitList.isNotEmpty())
-    {
-        Card(
-            modifier = modifier, colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+
+    Card(
+        modifier = modifier, colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                ItemDetailsRow(
-                    labelResID = R.string.item,
-                    itemDetail = item.name,
-                    modifier = Modifier.padding(
-                        horizontal = 0.dp
-                    )
+            ItemDetailsRow(
+                labelResID = R.string.item,
+                itemDetail = item.name,
+                modifier = Modifier.padding(
+                    horizontal = 0.dp
                 )
-                ItemDetailsRow(
-                    labelResID = R.string.quantity,
-                    itemDetail = item.quantity.toString(),
-                    modifier = Modifier.padding(
-                        horizontal = 0.dp
-                    )
+            )
+            ItemDetailsRow(
+                labelResID = R.string.quantity,
+                itemDetail = item.quantity.toString(),
+                modifier = Modifier.padding(
+                    horizontal = 0.dp
                 )
-                ItemDetailsRow(
-                    labelResID = R.string.quantity_type,
-                    itemDetail = context.getString(
-                        quantityUnitList.first{ it.id == item.quantityType }.name
-                    ),
-                    modifier = Modifier.padding(
-                        horizontal = 0.dp
-                    )
+            )
+            ItemDetailsRow(
+                labelResID = R.string.quantity_type,
+                itemDetail = context.getString(
+                    quantityUnitList.first { it.id == item.quantityType }.name
+                ),
+                modifier = Modifier.padding(
+                    horizontal = 0.dp
                 )
-                ItemDetailsRow(
-                    labelResID = R.string.price,
-                    itemDetail = item.formatedPrice(),
-                    modifier = Modifier.padding(
-                        horizontal = 0.dp
-                    )
+            )
+            ItemDetailsRow(
+                labelResID = R.string.price,
+                itemDetail = item.formatedPrice(),
+                modifier = Modifier.padding(
+                    horizontal = 0.dp
                 )
-            }
-
+            )
         }
-    }
 
+    }
 }
 
 @Composable

@@ -1,9 +1,12 @@
+package com.intern.calculator.goods.ui.components
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -16,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,7 +31,7 @@ import com.intern.calculator.goods.R
 fun CustomDialog(
     oldValue: String,
     neededAction: Int,
-    onConfirmation: () -> Unit,
+    onConfirmation: (String) -> Unit,
     onCancel: () -> Unit,
 ) {
     Dialog(onDismissRequest = {}) {
@@ -47,7 +49,7 @@ fun CustomDialogUI(
     modifier: Modifier = Modifier,
     oldValue: String,
     neededAction: Int,
-    onConfirmation: () -> Unit,
+    onConfirmation: (String) -> Unit,
     onCancel: () -> Unit,
 ) {
     var newValue by remember {
@@ -55,7 +57,7 @@ fun CustomDialogUI(
     }
     Card(
         shape = MaterialTheme.shapes.medium,
-        // modifier = modifier.size(280.dp, 240.dp)
+//         modifier = modifier.size(280.dp, 240.dp)
         modifier = Modifier.padding(10.dp, 5.dp, 10.dp, 10.dp),
     ) {
         Column(modifier.background(MaterialTheme.colorScheme.surface)) {
@@ -125,7 +127,7 @@ fun CustomDialogUI(
                     )
                 }
                 TextButton(onClick = {
-                    onConfirmation()
+                    onConfirmation(newValue)
                 }, Modifier.fillMaxWidth().weight(1f)) {
                     Text(
                         text = stringResource(when (neededAction) {

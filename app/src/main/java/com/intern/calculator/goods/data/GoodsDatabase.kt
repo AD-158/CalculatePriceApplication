@@ -39,10 +39,7 @@ abstract class GoodsDatabase : RoomDatabase() {
             CoroutineScope(Dispatchers.IO).launch {
                 // Obtain the categoryDao
                 val categoryDao = getDatabase(context).categoryDao()
-
-                // Example: Inserting a category when the database is created
-                val category = Category(name = context.getString(R.string.first_list))
-                categoryDao.insert(category)
+                categoryDao.insert(Category(name = context.getString(R.string.first_list)))
                 val quantityUnitDAO = getDatabase(context).quantityUnitDao()
                 quantityUnitDAO.insert(QuantityUnit(name = R.string.g, multiplier = 1000))
                 quantityUnitDAO.insert(QuantityUnit(name = R.string.kg, multiplier = 1))

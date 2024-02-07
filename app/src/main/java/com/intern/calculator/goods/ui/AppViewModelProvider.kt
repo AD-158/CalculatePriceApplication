@@ -18,6 +18,7 @@ object AppViewModelProvider {
             HomeViewModel(
                 CalculatePriceApplication().container.itemsRepository,
                 CalculatePriceApplication().container.quantityRepository,
+                CalculatePriceApplication().container.categoryRepository,
             )
         }
         // Initializer for ItemEntryViewModel

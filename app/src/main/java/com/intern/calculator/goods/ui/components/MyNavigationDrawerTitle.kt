@@ -1,4 +1,4 @@
-package com.intern.calculator.goods.ui.home
+package com.intern.calculator.goods.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

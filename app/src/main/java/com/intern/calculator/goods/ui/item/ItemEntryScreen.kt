@@ -4,6 +4,7 @@ import android.icu.util.Currency
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -12,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -60,46 +62,57 @@ fun ItemEntryScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val quantityUnitList = viewModel.getQuantityUnitList()
-    Scaffold(
-        topBar = {
-            MyTopAppBar(
-                title = stringResource(ItemEntryDestination.titleRes),
-                navigationIcon = Icons.Outlined.ArrowBack,
-                navigationIconContentDescription = "Navigate back",
-                actionIcon = null,
-                actionIconContentDescription = null,
-                onNavigationClick = onNavigateUp
+    var quantityUnitList = viewModel.getQuantityUnitList()
+    if (quantityUnitList.isNotEmpty()) {
+        Scaffold(
+            topBar = {
+                MyTopAppBar(
+                    title = stringResource(ItemEntryDestination.titleRes),
+                    navigationIcon = Icons.Outlined.ArrowBack,
+                    navigationIconContentDescription = "Navigate back",
+                    actionIcon = null,
+                    actionIconContentDescription = null,
+                    onNavigationClick = onNavigateUp
+                )
+            }
+        ) { innerPadding ->
+            ItemEntryBody(
+                itemUiState = viewModel.itemUiState,
+                quantityUnitList = quantityUnitList,
+                onItemValueChange = viewModel::updateUiState,
+                onSaveClick = {
+                    coroutineScope.launch {
+                        viewModel.updateUiState(
+                            viewModel.itemUiState.itemDetails.copy(
+                                aList = receivedVariable.toString(),
+                                quantityType =
+                                quantityUnitList.first {
+                                    context.getString(it.name) ==
+                                            viewModel.itemUiState.itemDetails.quantityType
+                                }.id.toString()
+                            )
+                        )
+
+                        viewModel.saveItem()
+                        navigateBack()
+                    }
+                },
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxWidth(),
+                buttonText = buttonText,
             )
         }
-    ) { innerPadding ->
-        ItemEntryBody(
-            itemUiState = viewModel.itemUiState,
-            quantityUnitList = quantityUnitList,
-            onItemValueChange = viewModel::updateUiState,
-            onSaveClick = {
-                coroutineScope.launch {
-                    viewModel.updateUiState(
-                        viewModel.itemUiState.itemDetails.copy(
-                            aList = receivedVariable.toString(),
-                            quantityType =
-                            quantityUnitList.first {
-                                context.getString(it.name) ==
-                                        viewModel.itemUiState.itemDetails.quantityType
-                            }.id.toString()
-                        )
-                    )
-
-                    viewModel.saveItem()
-                    navigateBack()
-                }
-            },
-            modifier = Modifier
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .fillMaxWidth(),
-            buttonText = buttonText,
-        )
+    } else {
+        quantityUnitList = viewModel.getQuantityUnitList()
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            CircularProgressIndicator()
+        }
     }
 }
 
@@ -144,173 +157,169 @@ fun ItemInputForm(
 ) {
     val context = LocalContext.current
     val options = quantityUnitList.map { context.getString(it.name) }
-    if (options.isNotEmpty()) {
-        var expanded by remember { mutableStateOf(false) }
-        var selectedOptionText by remember { mutableStateOf(
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOptionText by remember {
+        mutableStateOf(
             if (itemDetails.quantityType.isNullOrBlank() and options.isNotEmpty()) {
                 options[0]
-            }
-            else {
+            } else {
                 options[itemDetails.quantityType.toInt() - 1]
             }
-        )}
+        )
+    }
 
-        Column(
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
             modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            Row(
-                modifier = modifier,
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                OutlinedTextField(
-                    value = itemDetails.name,
-                    onValueChange = {
-                        onValueChange(
-                            itemDetails.copy(name = it)
-                        )
-                    },
-                    label = { Text(stringResource(R.string.item_entry_name_placeholder)) },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = enabled,
-                    singleLine = true
-                )
-            }
-            Row(
-                modifier = modifier,
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                OutlinedTextField(
-                    value = itemDetails.price,
-                    onValueChange = {
-                        if (itemDetails.quantityType.isNullOrBlank()) {
-                            onValueChange(
-                                itemDetails.copy(
-                                    price = it,
-                                    quantityType = selectedOptionText
-                                )
-                            )
-                        }
-                        else {
-                            onValueChange(
-                                itemDetails.copy(
-                                    price = it
-                                )
-                            )
-                        } },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    label = { Text(stringResource(R.string.item_entry_price_placeholder)) },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    ),
-                    leadingIcon = { Text(Currency.getInstance(Locale.getDefault()).symbol) },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = enabled,
-                    singleLine = true
-                )
-            }
-            Row(
-                modifier = modifier,
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Column(
-                    modifier = modifier.weight(2f)
-                ) {
-                    OutlinedTextField(
-                        value = itemDetails.quantity,
-                        onValueChange = { onValueChange(itemDetails.copy(quantity = it)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        label = { Text(stringResource(R.string.item_entry_quantity_placeholder)) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = enabled,
-                        singleLine = true
+            OutlinedTextField(
+                value = itemDetails.name,
+                onValueChange = {
+                    onValueChange(
+                        itemDetails.copy(name = it)
                     )
-                }
-                Column(
-                    modifier = modifier.weight(1f)
-                ) {
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = {
-                            expanded = !expanded
-                        },)
-                    {
-                        OutlinedTextField(
-                            readOnly = true,
-                            value =
-                            if (itemDetails.quantityType.isNullOrBlank()) {
-                                selectedOptionText.substringBefore(" ")
-                            }
-                            else {
-                                context.getString(
-                                    quantityUnitList.firstOrNull() {
-                                        context.getString(it.name) ==
-                                                itemDetails.quantityType}?.name ?:
-                                                quantityUnitList.first {
-                                                    (it.id) == itemDetails.quantityType.toInt()}.name
-                                )
-                            },
-                            onValueChange = {},
-                            label = { Text(text = stringResource(id = R.string.quantity_type)) },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(
-                                    expanded = expanded
-                                )
-                            },
-                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                            modifier = Modifier.menuAnchor(),
-                            singleLine = true,
+                },
+                label = { Text(stringResource(R.string.item_entry_name_placeholder)) },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                enabled = enabled,
+                singleLine = true
+            )
+        }
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly,
+        ) {
+            OutlinedTextField(
+                value = itemDetails.price,
+                onValueChange = {
+                    if (itemDetails.quantityType.isNullOrBlank()) {
+                        onValueChange(
+                            itemDetails.copy(
+                                price = it,
+                                quantityType = selectedOptionText
+                            )
                         )
-                        ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = {
-                                expanded = false
-                            }
-                        ) {
-                            options.forEach { selectionOption ->
-                                DropdownMenuItem(
-                                    text = { Text(text = selectionOption) },
-                                    onClick = {
-                                        selectedOptionText = selectionOption
-                                        expanded = false
+                    } else {
+                        onValueChange(
+                            itemDetails.copy(
+                                price = it
+                            )
+                        )
+                    }
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                label = { Text(stringResource(R.string.item_entry_price_placeholder)) },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                ),
+                leadingIcon = { Text(Currency.getInstance(Locale.getDefault()).symbol) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = enabled,
+                singleLine = true
+            )
+        }
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Column(
+                modifier = modifier.weight(2f)
+            ) {
+                OutlinedTextField(
+                    value = itemDetails.quantity,
+                    onValueChange = { onValueChange(itemDetails.copy(quantity = it)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    label = { Text(stringResource(R.string.item_entry_quantity_placeholder)) },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = enabled,
+                    singleLine = true
+                )
+            }
+            Column(
+                modifier = modifier.weight(1f)
+            ) {
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = {
+                        expanded = !expanded
+                    },
+                )
+                {
+                    OutlinedTextField(
+                        readOnly = true,
+                        value =
+                        if (itemDetails.quantityType.isNullOrBlank()) {
+                            selectedOptionText.substringBefore(" ")
+                        } else {
+                            context.getString(
+                                quantityUnitList.firstOrNull() {
+                                    context.getString(it.name) ==
+                                            itemDetails.quantityType
+                                }?.name ?: quantityUnitList.first {
+                                    (it.id) == itemDetails.quantityType.toInt()
+                                }.name
+                            )
+                        },
+                        onValueChange = {},
+                        label = { Text(text = stringResource(id = R.string.quantity_type)) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                expanded = expanded
+                            )
+                        },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                        modifier = Modifier.menuAnchor(),
+                        singleLine = true,
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = {
+                            expanded = false
+                        }
+                    ) {
+                        options.forEach { selectionOption ->
+                            DropdownMenuItem(
+                                text = { Text(text = selectionOption) },
+                                onClick = {
+                                    selectedOptionText = selectionOption
+                                    expanded = false
 
-                                        onValueChange(
-                                            itemDetails.copy(
-                                                quantityType = selectionOption
-                                            )
+                                    onValueChange(
+                                        itemDetails.copy(
+                                            quantityType = selectionOption
                                         )
-                                    }
-                                )
-                            }
+                                    )
+                                }
+                            )
                         }
                     }
                 }
             }
-            if (enabled) {
-                Text(
-                    text = stringResource(R.string.required_fields),
-                    modifier = Modifier.padding(start = 16.dp)
-                )
-            }
         }
-    } else {
-        // Обработка ситуации, когда список пуст
-        Text("Loading quantity units...")
+        if (enabled) {
+            Text(
+                text = stringResource(R.string.required_fields),
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
     }
-
 }

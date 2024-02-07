@@ -5,18 +5,19 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "t_item",
+@Entity(
+    tableName = "t_item",
     foreignKeys = [
         ForeignKey(
             entity = Category::class,
-            parentColumns = arrayOf("t_category_id"),
-            childColumns = arrayOf("t_item_category_id"),
+            parentColumns = ["t_category_id"],
+            childColumns = ["t_item_category_id"],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = QuantityUnit::class,
-            parentColumns = arrayOf("t_quantity_unit_id"),
-            childColumns = arrayOf("t_item_quantity_type"),
+            parentColumns = ["t_quantity_unit_id"],
+            childColumns = ["t_item_quantity_type"],
             onDelete = ForeignKey.CASCADE
         ),
     ]
