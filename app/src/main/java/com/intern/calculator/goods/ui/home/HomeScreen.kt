@@ -74,12 +74,17 @@ import com.intern.calculator.goods.ui.components.MyNavigationDrawerTitle
 import com.intern.calculator.goods.ui.components.MyTopAppBar
 import com.intern.calculator.goods.ui.item.formatedPrice
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
+import com.intern.calculator.goods.ui.settings.Language
+import com.intern.calculator.goods.ui.settings.SettingsViewModel
+import com.intern.calculator.goods.ui.settings.Theme
+import com.intern.calculator.goods.ui.settings.UserPreferences
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.lang.Exception
 import java.text.NumberFormat
+import java.util.Locale
 
 object HomeDestination : NavigationDestination {
     override val route = "home"
@@ -92,23 +97,24 @@ object HomeDestination : NavigationDestination {
 fun HomeScreen(
     navigateToItemEntry: (Int) -> Unit,
     navigateToItemUpdate: (Int) -> Unit,
+    navigateToSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val scope = rememberCoroutineScope()
     // Состояние панели меню
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
+    val userPreferences by settingsViewModel.userPreferences.collectAsState(
+        initial = UserPreferences(Theme.Dark, Language.English, 1)
+    )
+
     val homeUiState by viewModel.homeUiState.collectAsState()
     val context = LocalContext.current
 
     var menuItems = viewModel.getCategoryList()
-
-    // Выбранный элемент в меню
-    var selectedItem by remember { mutableIntStateOf(1) }
-    viewModel.updateItemListBasedOnId(selectedItem)
-    var quantityUnitList = viewModel.getQuantityUnitList()
 
     // Активация возможности изменить/удалить списки
     var couldChange by remember { mutableStateOf(false) }
@@ -124,6 +130,15 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     var needReload by remember { mutableStateOf(false) }
+
+
+    // Выбранный элемент в меню
+    var selectedItem by remember { mutableIntStateOf(userPreferences.selectedList) }
+    LaunchedEffect(key1 = userPreferences) {
+        selectedItem = userPreferences.selectedList
+    }
+    viewModel.updateItemListBasedOnId(selectedItem)
+    var quantityUnitList = viewModel.getQuantityUnitList()
 
     // Вызов диалога изменения/удаления
     if (openDialogCustom.value) {
@@ -168,14 +183,13 @@ fun HomeScreen(
                                 }
                                 else -> {
                                     viewModel.deleteCategory(menuItems.first { it.name == oldValue })
-                                    menuItems.toMutableList().apply {
-                                        removeIf { it.id == (
-                                                menuItems.first { item -> item.name == oldValue }.id) }
-                                    }
+                                    val filteredList = menuItems.filter { it.id != (
+                                            menuItems.first { item -> item.name == oldValue }.id) }
                                     if (selectedItem == (menuItems.first { it.name == oldValue }.id)) {
                                         selectedItem = ((menuItems.first().id))
                                     }
-                                    if (menuItems.isEmpty()) {
+                                    settingsViewModel.updateSelectedList(selectedItem)
+                                    if (filteredList.isEmpty()) {
                                         viewModel.createCategory(
                                             Category(
                                                 id = 0,
@@ -236,7 +250,10 @@ fun HomeScreen(
                                                     },
                                             onClick = {
                                                 selectedItem = item.id
-                                                scope.launch { drawerState.close() }
+                                                scope.launch {
+                                                    settingsViewModel.updateSelectedList(selectedItem)
+                                                    drawerState.close()
+                                                }
                                             },
                                             badge = {
                                                 // Изменить
@@ -389,7 +406,8 @@ fun HomeScreen(
                                         if (isClosed) open() else close()
                                     }
                                 }
-                            }
+                            },
+                            onActionClick = navigateToSettings
                         )
                     },
                     snackbarHost = {

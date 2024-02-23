@@ -16,6 +16,8 @@ import com.intern.calculator.goods.ui.item.ItemEditDestination
 import com.intern.calculator.goods.ui.item.ItemEditScreen
 import com.intern.calculator.goods.ui.item.ItemEntryDestination
 import com.intern.calculator.goods.ui.item.ItemEntryScreen
+import com.intern.calculator.goods.ui.settings.SettingsDestination
+import com.intern.calculator.goods.ui.settings.SettingsScreen
 
 @Composable
 fun GoodsNavHost(
@@ -28,11 +30,17 @@ fun GoodsNavHost(
         composable(
             route = HomeDestination.route,
         ) {
-            HomeScreen(navigateToItemEntry = { navController.navigate("${ItemEntryDestination.route}/${it}") },
+            HomeScreen(
+                navigateToItemEntry = {
+                    navController.navigate("${ItemEntryDestination.route}/${it}")
+                },
                 navigateToItemUpdate = {
                     navController.navigate("${ItemDetailsDestination.route}/${it}")
-                })
+                },
+                navigateToSettings = { navController.navigate(SettingsDestination.route) },
+            )
         }
+
         composable(
             route = ItemEntryDestination.routeWithArgs,
             arguments = listOf(navArgument(ItemEntryDestination.itemIdArg) {
@@ -51,22 +59,29 @@ fun GoodsNavHost(
             arguments = listOf(navArgument(ItemDetailsDestination.itemIdArg) {
                 type = NavType.IntType
             })
-        ) {
+        ) { navBackStackEntry ->
             ItemDetailsScreen(
-                navigateToEditItem =
-                {
-                    navController.navigate("${ItemEditDestination.route}/$it")
+                navigateToEditItem = { itemId ->
+                    navController.navigate("${ItemEditDestination.route}/$itemId")
                 },
-                navigateBack = { navController.navigateUp() })
+                navigateBack = { navController.navigateUp() }
+            )
         }
         composable(
             route = ItemEditDestination.routeWithArgs,
             arguments = listOf(navArgument(ItemEditDestination.itemIdArg) {
                 type = NavType.IntType
             })
-        ) {
-            ItemEditScreen(navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() })
+        ) { navBackStackEntry ->
+            ItemEditScreen(
+                navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
+        composable(route = SettingsDestination.route) {
+            SettingsScreen(
+                navigateUp = { navController.navigateUp() }
+            )
         }
     }
 }

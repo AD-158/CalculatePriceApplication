@@ -43,4 +43,13 @@
     <string name="first_list">Начальный список</string>
     <string name="home_top_card">"Имя списка - "</string>
     <string name="price_per_kg_or_l">" за кг или литр"</string>
+    <string name="setting_title">Настройки</string>
+    <string name="setting_theme">Выберите тему</string>
+    <string name="setting_theme_light">Светлая</string>
+    <string name="setting_theme_dark">Темная</string>
+    <string name="setting_theme_system">Как в системе</string>
+    <string name="setting_language">Выберите язык</string>
+    <string name="setting_language_english">English</string>
+    <string name="setting_language_russian">Русский</string>
+    <string name="setting_send_feedback">Написать разработчику</string>
 </resources>

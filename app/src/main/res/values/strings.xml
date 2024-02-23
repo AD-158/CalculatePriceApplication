@@ -42,4 +42,13 @@
     <string name="first_list">Default List</string>
     <string name="home_top_card">"Name of the list - "</string>
     <string name="price_per_kg_or_l">" per kg or litre"</string>
+    <string name="setting_title">Settings</string>
+    <string name="setting_theme">Choose a theme</string>
+    <string name="setting_theme_light">Light</string>
+    <string name="setting_theme_dark">Dark</string>
+    <string name="setting_theme_system">System</string>
+    <string name="setting_language">Choose a language</string>
+    <string name="setting_language_english">English</string>
+    <string name="setting_language_russian">Русский</string>
+    <string name="setting_send_feedback">Send a message to the developer</string>
 </resources>

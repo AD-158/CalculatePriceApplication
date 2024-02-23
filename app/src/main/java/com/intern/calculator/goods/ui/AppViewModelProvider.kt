@@ -10,6 +10,7 @@ import com.intern.calculator.goods.ui.home.HomeViewModel
 import com.intern.calculator.goods.ui.item.ItemDetailsViewModel
 import com.intern.calculator.goods.ui.item.ItemEditViewModel
 import com.intern.calculator.goods.ui.item.ItemEntryViewModel
+import com.intern.calculator.goods.ui.settings.SettingsViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -42,6 +43,12 @@ object AppViewModelProvider {
                 this.createSavedStateHandle(),
                 CalculatePriceApplication().container.itemsRepository,
                 CalculatePriceApplication().container.quantityRepository,
+            )
+        }
+        // Initializer for SettingsViewModel
+        initializer {
+            SettingsViewModel(
+                repository = CalculatePriceApplication().container.settingsRepository,
             )
         }
     }
