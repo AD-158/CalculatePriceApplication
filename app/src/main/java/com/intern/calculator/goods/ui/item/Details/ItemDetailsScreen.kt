@@ -1,4 +1,4 @@
-package com.intern.calculator.goods.ui.item
+package com.intern.calculator.goods.ui.item.Details
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
@@ -45,11 +45,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.intern.calculator.goods.R
-import com.intern.calculator.goods.data.Item
-import com.intern.calculator.goods.data.QuantityUnit
+import com.intern.calculator.goods.data.Classes.Item
+import com.intern.calculator.goods.data.Classes.QuantityUnit
 import com.intern.calculator.goods.ui.AppViewModelProvider
 import com.intern.calculator.goods.ui.components.CustomDialog
 import com.intern.calculator.goods.ui.components.MyTopAppBar
+import com.intern.calculator.goods.ui.item.Entry.formatedPrice
+import com.intern.calculator.goods.ui.item.Entry.toItem
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
 

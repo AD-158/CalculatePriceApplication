@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
-
+import java.util.Locale
 
 
 data class UserPreferences(
@@ -85,15 +85,22 @@ class UserPreferencesRepository(
     suspend fun fetchInitialPreferences() =
         mapUserPreferences(dataStore.data.first().toPreferences())
 
+    fun toLanguage(locale: String): Language {
+        return when (locale) {
+            ("en") -> Language.English
+            ("ru") -> Language.Русский
+            else -> Language.English
+        }
+    }
 
     private fun mapUserPreferences(preferences: Preferences): UserPreferences {
         val theme = preferences[PreferencesKeys.THEME_KEY]?.let { Theme.valueOf(it) } ?: Theme.System
-        val language = preferences[PreferencesKeys.LANGUAGE_KEY]?.let { Language.valueOf(it) } ?: Language.English
+        val language = preferences[PreferencesKeys.LANGUAGE_KEY]?.let { Language.valueOf(it) } ?: toLanguage(
+            Locale.getDefault().getLanguage())
         val selectedList = preferences[PreferencesKeys.SELECTED_LIST_KEY] ?: 1
         val locale = when (language) {
             Language.English -> ("en")
             Language.Русский -> ("ru")
-            else -> {("en")}
         }
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(locale))
         return UserPreferences(theme = theme, language = language, selectedList = selectedList)

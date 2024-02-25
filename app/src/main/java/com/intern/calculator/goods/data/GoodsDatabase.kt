@@ -6,6 +6,12 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.intern.calculator.goods.R
+import com.intern.calculator.goods.data.Classes.Category
+import com.intern.calculator.goods.data.Classes.Item
+import com.intern.calculator.goods.data.Classes.QuantityUnit
+import com.intern.calculator.goods.data.DAO.CategoryDAO
+import com.intern.calculator.goods.data.DAO.ItemDAO
+import com.intern.calculator.goods.data.DAO.QuantityUnitDAO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -51,4 +51,10 @@
     <string name="setting_language_english">English</string>
     <string name="setting_language_russian">Русский</string>
     <string name="setting_send_feedback">Send a message to the developer</string>
+    <string name="setting_about_app">About app</string>
+    <string name="about_title">About this App</string>
+    <string name="about_version">"Version "</string>
+    <string name="about_time">"from "</string>
+    <string name="setting_mail_subject">Feedback on Your App</string>
+    <string name="setting_mail_message">Write your feedback here...</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.intern.calculator.goods.ui.item
+package com.intern.calculator.goods.ui.item.Edit
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,6 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.intern.calculator.goods.R
 import com.intern.calculator.goods.ui.AppViewModelProvider
 import com.intern.calculator.goods.ui.components.MyTopAppBar
+import com.intern.calculator.goods.ui.item.Entry.ItemEntryBody
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
 

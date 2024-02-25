@@ -1,5 +1,8 @@
-package com.intern.calculator.goods.data
+package com.intern.calculator.goods.data.Repository.Offline
 
+import com.intern.calculator.goods.data.Classes.Item
+import com.intern.calculator.goods.data.DAO.ItemDAO
+import com.intern.calculator.goods.data.Repository.Online.ItemsRepository
 import kotlinx.coroutines.flow.Flow
 
 class OfflineItemsRepository(private val itemDao: ItemDAO) : ItemsRepository {

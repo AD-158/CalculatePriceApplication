@@ -1,4 +1,4 @@
-package com.intern.calculator.goods.ui.item
+package com.intern.calculator.goods.ui.item.Edit
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -8,10 +8,14 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.intern.calculator.goods.data.ItemsRepository
-import com.intern.calculator.goods.data.QuantityUnit
-import com.intern.calculator.goods.data.QuantityUnitRepository
+import com.intern.calculator.goods.data.Repository.Online.ItemsRepository
+import com.intern.calculator.goods.data.Classes.QuantityUnit
+import com.intern.calculator.goods.data.Repository.Online.QuantityUnitRepository
 import com.intern.calculator.goods.ui.home.QuantityUnitUiState
+import com.intern.calculator.goods.ui.item.Entry.ItemDetails
+import com.intern.calculator.goods.ui.item.Entry.ItemUiState
+import com.intern.calculator.goods.ui.item.Entry.toItem
+import com.intern.calculator.goods.ui.item.Entry.toItemUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull

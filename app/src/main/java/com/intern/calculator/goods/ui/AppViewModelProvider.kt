@@ -7,9 +7,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.intern.calculator.goods.CalculatePriceApplication
 import com.intern.calculator.goods.ui.home.HomeViewModel
-import com.intern.calculator.goods.ui.item.ItemDetailsViewModel
-import com.intern.calculator.goods.ui.item.ItemEditViewModel
-import com.intern.calculator.goods.ui.item.ItemEntryViewModel
+import com.intern.calculator.goods.ui.item.Details.ItemDetailsViewModel
+import com.intern.calculator.goods.ui.item.Edit.ItemEditViewModel
+import com.intern.calculator.goods.ui.item.Entry.ItemEntryViewModel
 import com.intern.calculator.goods.ui.settings.SettingsViewModel
 
 object AppViewModelProvider {

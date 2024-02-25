@@ -1,5 +1,6 @@
-package com.intern.calculator.goods.data
+package com.intern.calculator.goods.data.Repository.Online
 
+import com.intern.calculator.goods.data.Classes.QuantityUnit
 import kotlinx.coroutines.flow.Flow
 
 interface QuantityUnitRepository {

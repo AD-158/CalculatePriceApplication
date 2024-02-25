@@ -1,26 +1,26 @@
 package com.intern.calculator.goods.ui.settings
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowRightAlt
+import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,12 +38,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -52,6 +50,7 @@ import com.intern.calculator.goods.ui.AppViewModelProvider
 import com.intern.calculator.goods.ui.components.MyTopAppBar
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 
 object SettingsDestination : NavigationDestination {
@@ -62,13 +61,16 @@ object SettingsDestination : NavigationDestination {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(navigateUp: () -> Unit,
+                   navigateToAbout: () -> Unit,
                    viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val preferences by viewModel.userPreferences.collectAsState(
-        initial = UserPreferences(Theme.System, Language.English, 1)
+        initial = UserPreferences(
+            Theme.System,
+            viewModel.toLanguage(Locale.getDefault().getLanguage()),
+            1)
     )
     val coroutineScope = rememberCoroutineScope()
-    // Define a state to control the visibility of the AlertDialog
     val showThemeDialog = remember { mutableStateOf(false) }
     val showLanguageDialog = remember { mutableStateOf(false) }
 
@@ -233,10 +235,6 @@ fun SettingsScreen(navigateUp: () -> Unit,
     }
 
     Scaffold(
-        Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .navigationBarsPadding(),
         topBar = {
             MyTopAppBar(
                 title = stringResource(SettingsDestination.titleRes),
@@ -295,81 +293,54 @@ fun SettingsScreen(navigateUp: () -> Unit,
                     },
                 )
                 Divider()
-
-
-                Column(
-                    Modifier
-                        .weight(1f, true), verticalArrangement = Arrangement.Bottom
-                ) {
-
-
-                    Row {
-                        Button(
-                            onClick = {},
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                            modifier = Modifier.weight(1f, true)
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Spacer(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(5.dp)
-                                )
-                                Text(
-                                    text = "Get Source",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+                ListItem(
+                    headlineContent = {
+                        Row {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Outlined.Message,
+                                contentDescription = stringResource(id = R.string.setting_send_feedback),
+                                modifier = Modifier.padding(end = 2.dp)
+                            )
+                            Text(text = stringResource(id = R.string.setting_send_feedback))
                         }
-                        Button(
-                            onClick = {},
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                            modifier = Modifier.weight(1f, true)
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Spacer(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(5.dp)
-                                )
-                                Text(
-                                    text = "Spare a Star",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                        Button(
-                            onClick = {},
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                            modifier = Modifier.weight(1f, true)
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Spacer(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(5.dp)
-                                )
-                                Text(
-                                    text = "File a Bug",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(6.dp)
-                            .navigationBarsPadding()
-                    )
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowRightAlt,
+                            contentDescription = stringResource(id = R.string.setting_send_feedback),
+                            modifier = Modifier.padding(end = 2.dp)
+                        )
+                    },
+                    modifier = Modifier.clickable {
+                        val email = "mcrn158@gmail.com"
+                        val subject = context.getString(R.string.setting_mail_subject)
+                        val message = context.getString(R.string.setting_mail_message)
 
-                }
+                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                            data = Uri.parse("mailto:$email")
+                            putExtra(Intent.EXTRA_SUBJECT, subject)
+                            putExtra(Intent.EXTRA_TEXT, message)
+                        }
+                            context.startActivity(intent)
+
+                    },
+                )
+                Divider()
+                ListItem(
+                    headlineContent = {
+                        Row {
+                            Icon(
+                                imageVector = Icons.Outlined.Info,
+                                contentDescription = stringResource(id = R.string.setting_about_app),
+                                modifier = Modifier.padding(end = 2.dp)
+                            )
+                            Text(text = stringResource(id = R.string.setting_about_app))
+                        }
+                    },
+                    modifier = Modifier.clickable {
+                        navigateToAbout()
+                    },
+                )
             }
         }
     }

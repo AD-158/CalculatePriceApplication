@@ -1,8 +1,12 @@
-package com.intern.calculator.goods.data
+package com.intern.calculator.goods.data.Repository.Offline
 
+import com.intern.calculator.goods.data.Classes.QuantityUnit
+import com.intern.calculator.goods.data.DAO.QuantityUnitDAO
+import com.intern.calculator.goods.data.Repository.Online.QuantityUnitRepository
 import kotlinx.coroutines.flow.Flow
 
-class OfflineQuantityUnitRepository(private val quantityUnitDAO: QuantityUnitDAO) : QuantityUnitRepository {
+class OfflineQuantityUnitRepository(private val quantityUnitDAO: QuantityUnitDAO) :
+    QuantityUnitRepository {
     override fun getAllQuantityUnitStream(): Flow<List<QuantityUnit>> =
         quantityUnitDAO.getAllQuantityUnit()
 

@@ -1,4 +1,4 @@
-package com.intern.calculator.goods.ui.item
+package com.intern.calculator.goods.ui.item.Entry
 
 import android.icu.util.Currency
 import androidx.compose.foundation.layout.Arrangement
@@ -37,7 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.intern.calculator.goods.R
-import com.intern.calculator.goods.data.QuantityUnit
+import com.intern.calculator.goods.data.Classes.QuantityUnit
 import com.intern.calculator.goods.ui.AppViewModelProvider
 import com.intern.calculator.goods.ui.components.MyTopAppBar
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
@@ -48,7 +48,7 @@ object ItemEntryDestination : NavigationDestination {
     override val route = "item_entry"
     override val titleRes = R.string.item_entry_title
     const val itemIdArg = "itemId"
-    val routeWithArgs = "${route}/{$itemIdArg}"
+    val routeWithArgs = "$route/{$itemIdArg}"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

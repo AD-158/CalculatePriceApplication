@@ -1,7 +1,9 @@
-package com.intern.calculator.goods.data
+package com.intern.calculator.goods.data.Repository.Offline
 
+import com.intern.calculator.goods.data.Classes.Category
+import com.intern.calculator.goods.data.DAO.CategoryDAO
+import com.intern.calculator.goods.data.Repository.Online.CategoryRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.runBlocking
 
 class OfflineCategoryRepository(private val categoryDao: CategoryDAO) : CategoryRepository {
     override fun getAllCategoriesStream(): Flow<List<Category>> = categoryDao.getAllCategories()

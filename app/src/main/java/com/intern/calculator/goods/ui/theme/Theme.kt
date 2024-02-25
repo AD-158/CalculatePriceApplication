@@ -24,6 +24,7 @@ import com.intern.calculator.goods.ui.settings.SettingsViewModel
 import com.intern.calculator.goods.ui.settings.Theme
 import com.intern.calculator.goods.ui.settings.UserPreferences
 import kotlinx.coroutines.runBlocking
+import java.util.Locale
 
 private val LightColorScheme = lightColorScheme(
     primary = md_theme_light_primary,
@@ -95,7 +96,10 @@ fun GoodsTheme(
     content: @Composable () -> Unit
 ) {
     val userPreferences by viewModel.userPreferences.collectAsState(
-        initial = UserPreferences(Theme.Dark, Language.English, 1)
+        initial = UserPreferences(
+            Theme.System,
+            viewModel.toLanguage(Locale.getDefault().getLanguage()),
+            1)
     )
 
     val colorScheme = when (userPreferences.theme) {

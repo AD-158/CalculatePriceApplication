@@ -10,12 +10,14 @@ import androidx.navigation.navArgument
 import com.intern.calculator.goods.R
 import com.intern.calculator.goods.ui.home.HomeDestination
 import com.intern.calculator.goods.ui.home.HomeScreen
-import com.intern.calculator.goods.ui.item.ItemDetailsDestination
-import com.intern.calculator.goods.ui.item.ItemDetailsScreen
-import com.intern.calculator.goods.ui.item.ItemEditDestination
-import com.intern.calculator.goods.ui.item.ItemEditScreen
-import com.intern.calculator.goods.ui.item.ItemEntryDestination
-import com.intern.calculator.goods.ui.item.ItemEntryScreen
+import com.intern.calculator.goods.ui.item.Details.ItemDetailsDestination
+import com.intern.calculator.goods.ui.item.Details.ItemDetailsScreen
+import com.intern.calculator.goods.ui.item.Edit.ItemEditDestination
+import com.intern.calculator.goods.ui.item.Edit.ItemEditScreen
+import com.intern.calculator.goods.ui.item.Entry.ItemEntryDestination
+import com.intern.calculator.goods.ui.item.Entry.ItemEntryScreen
+import com.intern.calculator.goods.ui.settings.AboutDestination
+import com.intern.calculator.goods.ui.settings.AboutScreen
 import com.intern.calculator.goods.ui.settings.SettingsDestination
 import com.intern.calculator.goods.ui.settings.SettingsScreen
 
@@ -64,7 +66,7 @@ fun GoodsNavHost(
                 navigateToEditItem = { itemId ->
                     navController.navigate("${ItemEditDestination.route}/$itemId")
                 },
-                navigateBack = { navController.navigateUp() }
+                navigateBack = { navController.navigateUp() },
             )
         }
         composable(
@@ -75,12 +77,18 @@ fun GoodsNavHost(
         ) { navBackStackEntry ->
             ItemEditScreen(
                 navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() }
+                onNavigateUp = { navController.navigateUp() },
             )
         }
         composable(route = SettingsDestination.route) {
             SettingsScreen(
-                navigateUp = { navController.navigateUp() }
+                navigateUp = { navController.navigateUp() },
+                navigateToAbout = { navController.navigate(AboutDestination.route) },
+            )
+        }
+        composable(route = AboutDestination.route) {
+            AboutScreen(
+                navigateUp = { navController.navigateUp() },
             )
         }
     }

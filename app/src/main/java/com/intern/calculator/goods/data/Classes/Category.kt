@@ -1,4 +1,4 @@
-package com.intern.calculator.goods.data
+package com.intern.calculator.goods.data.Classes
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey

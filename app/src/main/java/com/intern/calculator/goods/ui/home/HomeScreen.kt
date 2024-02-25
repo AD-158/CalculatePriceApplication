@@ -1,7 +1,5 @@
 package com.intern.calculator.goods.ui.home
 
-import com.intern.calculator.goods.ui.components.CustomDialog
-import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -66,23 +64,19 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.intern.calculator.goods.R
-import com.intern.calculator.goods.data.Category
-import com.intern.calculator.goods.data.Item
-import com.intern.calculator.goods.data.QuantityUnit
+import com.intern.calculator.goods.data.Classes.Category
+import com.intern.calculator.goods.data.Classes.Item
+import com.intern.calculator.goods.data.Classes.QuantityUnit
 import com.intern.calculator.goods.ui.AppViewModelProvider
+import com.intern.calculator.goods.ui.components.CustomDialog
 import com.intern.calculator.goods.ui.components.MyNavigationDrawerTitle
 import com.intern.calculator.goods.ui.components.MyTopAppBar
-import com.intern.calculator.goods.ui.item.formatedPrice
+import com.intern.calculator.goods.ui.item.Entry.formatedPrice
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
-import com.intern.calculator.goods.ui.settings.Language
 import com.intern.calculator.goods.ui.settings.SettingsViewModel
 import com.intern.calculator.goods.ui.settings.Theme
 import com.intern.calculator.goods.ui.settings.UserPreferences
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import java.lang.Exception
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -92,7 +86,6 @@ object HomeDestination : NavigationDestination {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
     navigateToItemEntry: (Int) -> Unit,
@@ -108,7 +101,10 @@ fun HomeScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     val userPreferences by settingsViewModel.userPreferences.collectAsState(
-        initial = UserPreferences(Theme.Dark, Language.English, 1)
+        initial = UserPreferences(
+            Theme.System,
+            settingsViewModel.toLanguage(Locale.getDefault().getLanguage()),
+            1)
     )
 
     val homeUiState by viewModel.homeUiState.collectAsState()

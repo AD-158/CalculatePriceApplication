@@ -1,4 +1,4 @@
-package com.intern.calculator.goods.data
+package com.intern.calculator.goods.data.DAO
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.intern.calculator.goods.data.Classes.Category
 import kotlinx.coroutines.flow.Flow
 
 @Dao

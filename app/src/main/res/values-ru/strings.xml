@@ -52,4 +52,10 @@
     <string name="setting_language_english">English</string>
     <string name="setting_language_russian">Русский</string>
     <string name="setting_send_feedback">Написать разработчику</string>
+    <string name="setting_about_app">О приложении</string>
+    <string name="about_title">О приложении</string>
+    <string name="about_version">"Версия "</string>
+    <string name="about_time">"от "</string>
+    <string name="setting_mail_subject">Обратная связь о вашем приложении</string>
+    <string name="setting_mail_message">Напишите свой отзыв здесь...</string>
 </resources>
