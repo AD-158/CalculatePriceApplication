@@ -1,16 +1,15 @@
 package com.intern.calculator.goods.ui.settings
 
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,9 +29,8 @@ import com.intern.calculator.goods.ui.navigation.NavigationDestination
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
-
+// Define the destination for the about screen
 object AboutDestination : NavigationDestination {
     override val route = "about_app"
     override val titleRes = R.string.about_title
@@ -47,7 +45,7 @@ fun AboutScreen(
         topBar = {
             MyTopAppBar(
                 title = stringResource(AboutDestination.titleRes),
-                navigationIcon = Icons.Outlined.ArrowBack,
+                navigationIcon = Icons.AutoMirrored.Outlined.ArrowBack,
                 navigationIconContentDescription = "Navigate back",
                 actionIcon = null,
                 actionIconContentDescription = null,
@@ -55,73 +53,52 @@ fun AboutScreen(
             )
         },
     ) { padding ->
+        // Retrieve the application context
         val context = LocalContext.current
-        val manager = context.packageManager
-        val info = manager?.getPackageInfo(
+        // Retrieve package information to display version and last update date
+        val info = context.packageManager.getPackageInfo(
             context.packageName, 0
         )
-        val versionName = info?.versionName
+        val versionName = info.versionName
         val versionDate = SimpleDateFormat
             .getDateInstance(DateFormat.LONG, context.resources.configuration.locale)
-            .format(Date(info?.lastUpdateTime ?: 0))
+            .format(Date(info.lastUpdateTime ?: 0))
         Column(
-            Modifier
+            modifier = Modifier
                 .padding(padding)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(10.dp)
+                .wrapContentHeight(Alignment.Top)
         ) {
-            Row (
-                Modifier
-                    .padding(horizontal = 10.dp, vertical = 2.dp)
-                    .fillMaxWidth()
-                    .align(alignment = Alignment.CenterHorizontally)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            Row (
-                Modifier
-                    .padding(horizontal = 10.dp, vertical = 2.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = stringResource(id = R.string.app_name),
-                    style = MaterialTheme.typography.headlineLarge,
-                    textAlign = TextAlign.Center
-                )
-            }
-            Row (
-                Modifier
-                    .padding(horizontal = 10.dp, vertical = 2.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = (stringResource(id = R.string.about_version) + versionName),
-                    style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center
-                )
-            }
-            Row (
-                Modifier
-                    .padding(horizontal = 10.dp, vertical = 2.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = (stringResource(id = R.string.about_time) + versionDate),
-                    style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center
-                )
-            }
+            // Display the app icon
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            // Display the app name
+            Text(
+                text = stringResource(id = R.string.app_name),
+                style = MaterialTheme.typography.headlineLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            // Display the app version
+            Text(
+                text = (stringResource(id = R.string.about_version) + versionName),
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            // Display the last update date
+            Text(
+                text = (stringResource(id = R.string.about_time) + versionDate),
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
-
 }

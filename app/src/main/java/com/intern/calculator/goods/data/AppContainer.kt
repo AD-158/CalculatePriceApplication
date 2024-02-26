@@ -2,12 +2,12 @@ package com.intern.calculator.goods.data
 
 import android.content.Context
 import androidx.datastore.preferences.preferencesDataStore
-import com.intern.calculator.goods.data.Repository.Offline.OfflineCategoryRepository
-import com.intern.calculator.goods.data.Repository.Offline.OfflineItemsRepository
-import com.intern.calculator.goods.data.Repository.Offline.OfflineQuantityUnitRepository
-import com.intern.calculator.goods.data.Repository.Online.CategoryRepository
-import com.intern.calculator.goods.data.Repository.Online.ItemsRepository
-import com.intern.calculator.goods.data.Repository.Online.QuantityUnitRepository
+import com.intern.calculator.goods.data.repository.offline.OfflineCategoryRepository
+import com.intern.calculator.goods.data.repository.offline.OfflineItemsRepository
+import com.intern.calculator.goods.data.repository.offline.OfflineQuantityUnitRepository
+import com.intern.calculator.goods.data.repository.online.CategoryRepository
+import com.intern.calculator.goods.data.repository.online.ItemsRepository
+import com.intern.calculator.goods.data.repository.online.QuantityUnitRepository
 import com.intern.calculator.goods.ui.settings.UserPreferencesRepository
 
 /**
@@ -21,12 +21,16 @@ interface AppContainer {
 }
 
 /**
- * [AppContainer] implementation that provides instance of [OfflineItemsRepository] and [OfflineCategoryRepository]
+ * [AppContainer] implementation that provides instances of [OfflineItemsRepository], [OfflineCategoryRepository], [OfflineQuantityUnitRepository],
+ * and [UserPreferencesRepository].
  */
 class AppDataContainer(private val context: Context) : AppContainer {
+    // DataStore for storing user preferences
     private val Context.dataStore by preferencesDataStore(
         name = "settings"
     )
+
+    // Lazily initialize the repositories with database instances
     override val itemsRepository: ItemsRepository by lazy {
         OfflineItemsRepository(GoodsDatabase.getDatabase(context).itemDao())
     }
@@ -37,7 +41,6 @@ class AppDataContainer(private val context: Context) : AppContainer {
         OfflineQuantityUnitRepository(GoodsDatabase.getDatabase(context).quantityUnitDao())
     }
     override val settingsRepository: UserPreferencesRepository by lazy {
-        UserPreferencesRepository(dataStore = context.dataStore, context= context)
+        UserPreferencesRepository(dataStore = context.dataStore)
     }
-
 }

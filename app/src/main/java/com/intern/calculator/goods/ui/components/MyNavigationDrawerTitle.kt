@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,23 +18,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
+/**
+ * Composable function to display a title for the navigation drawer.
+ * @param title The title text to be displayed.
+ * @param drawerState The state of the drawer, used to open and close it.
+ */
 @Composable
 fun MyNavigationDrawerTitle(title: String, drawerState: DrawerState) {
-    val scope = rememberCoroutineScope()
+    // Remember coroutine scope for launching coroutines
+    val coroutineScope = rememberCoroutineScope()
+    // Row to contain the title text and the close button
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
+        // Title text
         Text(
             title,
             modifier = Modifier.padding(12.dp),
             maxLines = 1,
             style = MaterialTheme.typography.titleLarge
         )
+        // Close button to close the drawer
         IconButton(
             onClick = {
-                scope.launch {
+                // Toggle the drawer state (open/close)
+                coroutineScope.launch {
                     drawerState.apply {
                         if (isClosed) open() else close()
                     }
@@ -42,8 +52,9 @@ fun MyNavigationDrawerTitle(title: String, drawerState: DrawerState) {
             },
             modifier = Modifier.padding(8.dp)
         ) {
+            // Icon for the close button
             Icon(
-                imageVector = Icons.Filled.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Close Navbar Drawer"
             )
         }

@@ -1,7 +1,6 @@
 package com.intern.calculator.goods.ui.theme
 
 import android.app.Activity
-import android.content.res.Configuration
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -19,11 +18,9 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.intern.calculator.goods.ui.AppViewModelProvider
-import com.intern.calculator.goods.ui.settings.Language
 import com.intern.calculator.goods.ui.settings.SettingsViewModel
 import com.intern.calculator.goods.ui.settings.Theme
 import com.intern.calculator.goods.ui.settings.UserPreferences
-import kotlinx.coroutines.runBlocking
 import java.util.Locale
 
 private val LightColorScheme = lightColorScheme(
@@ -95,19 +92,23 @@ fun GoodsTheme(
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     content: @Composable () -> Unit
 ) {
+    // Collect user preferences from the view model
     val userPreferences by viewModel.userPreferences.collectAsState(
         initial = UserPreferences(
             Theme.System,
-            viewModel.toLanguage(Locale.getDefault().getLanguage()),
+            viewModel.toLanguage(Locale.getDefault().language),
             1)
     )
 
+    // Determine color scheme based on user preferences
     val colorScheme = when (userPreferences.theme) {
         Theme.Dark -> DarkColorScheme
         Theme.Light -> LightColorScheme
         Theme.System -> {
+            // Check system theme and apply dynamic color scheme if needed
             val isSystemInDarkTheme = isSystemInDarkTheme()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                // Retrieve the application context
                 val context = LocalContext.current
                 if (isSystemInDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(
                     context
@@ -119,6 +120,7 @@ fun GoodsTheme(
         }
     }
 
+    // Get current view and apply side effect to set window status bar color
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -128,6 +130,7 @@ fun GoodsTheme(
         }
     }
 
+    // Apply MaterialTheme with the determined color scheme and typography
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,

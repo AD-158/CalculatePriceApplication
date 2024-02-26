@@ -6,23 +6,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowRightAlt
 import androidx.compose.material.icons.automirrored.outlined.Message
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -53,32 +50,40 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 
+// Define the destination for the settings screen
 object SettingsDestination : NavigationDestination {
     override val route = "settings"
     override val titleRes = R.string.setting_title
 }
 
+// Composable function for the SettingsScreen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(navigateUp: () -> Unit,
                    navigateToAbout: () -> Unit,
                    viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    // Observe user preferences from the view model
     val preferences by viewModel.userPreferences.collectAsState(
         initial = UserPreferences(
             Theme.System,
-            viewModel.toLanguage(Locale.getDefault().getLanguage()),
+            viewModel.toLanguage(Locale.getDefault().language),
             1)
     )
+    // Remember coroutine scope for launching coroutines
     val coroutineScope = rememberCoroutineScope()
+
+    // Mutable state for showing theme and language dialogs
     val showThemeDialog = remember { mutableStateOf(false) }
     val showLanguageDialog = remember { mutableStateOf(false) }
 
+    // Theme dialog
     if (showThemeDialog.value) {
         AlertDialog(
             onDismissRequest = { showThemeDialog.value = false },
             title = { Text(text = stringResource(id = R.string.setting_theme)) },
             text = {
+                // Box to hold the column
                 Box(modifier = Modifier) {
                     Column(
                         Modifier
@@ -86,6 +91,8 @@ fun SettingsScreen(navigateUp: () -> Unit,
                             .selectableGroup()
                             .padding(all = 0.dp),
                     ) {
+                        // Radio buttons for selecting theme options
+                        // Each row represents a theme option
                         Row(
                             Modifier
                                 .fillMaxWidth(),
@@ -164,11 +171,14 @@ fun SettingsScreen(navigateUp: () -> Unit,
             },
         )
     }
+
+    // Language dialog
     if (showLanguageDialog.value) {
         AlertDialog(
             onDismissRequest = { showLanguageDialog.value = false },
             title = { Text(text = stringResource(id = R.string.setting_language)) },
             text = {
+                // Box to hold the column
                 Box(modifier = Modifier) {
                     Column(
                         Modifier
@@ -176,6 +186,8 @@ fun SettingsScreen(navigateUp: () -> Unit,
                             .selectableGroup()
                             .padding(all = 0.dp),
                     ) {
+                        // Radio buttons for selecting language options
+                        // Each row represents a language option
                         Row(
                             Modifier
                                 .fillMaxWidth(),
@@ -203,10 +215,10 @@ fun SettingsScreen(navigateUp: () -> Unit,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             RadioButton(
-                                selected = preferences.language == Language.Русский,
+                                selected = preferences.language == Language.Russian,
                                 onClick = {
                                     coroutineScope.launch {
-                                        viewModel.updateLanguage(Language.Русский)
+                                        viewModel.updateLanguage(Language.Russian)
                                     }
                                 },
                                 modifier = Modifier.semantics { contentDescription = "Localized Description" }
@@ -238,7 +250,7 @@ fun SettingsScreen(navigateUp: () -> Unit,
         topBar = {
             MyTopAppBar(
                 title = stringResource(SettingsDestination.titleRes),
-                navigationIcon = Icons.Outlined.ArrowBack,
+                navigationIcon = Icons.AutoMirrored.Outlined.ArrowBack,
                 navigationIconContentDescription = "Navigate back",
                 actionIcon = null,
                 actionIconContentDescription = null,
@@ -246,6 +258,7 @@ fun SettingsScreen(navigateUp: () -> Unit,
             )
         }
     ) { padding ->
+        // Retrieve the application context
         val context = LocalContext.current
         Column(
             Modifier
@@ -254,11 +267,13 @@ fun SettingsScreen(navigateUp: () -> Unit,
         ) {
             Column(
                 modifier = Modifier
-                    .width(600.dp)
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
             ) {
-                Divider()
+                // List items for different settings options
+                // Each item consists of a headline, supporting content, and optional trailing content
+                // Each item is clickable and performs a specific action
+                HorizontalDivider()
                 ListItem(
                     headlineContent = {
                         Row {
@@ -275,7 +290,7 @@ fun SettingsScreen(navigateUp: () -> Unit,
                         showThemeDialog.value = true
                     },
                 )
-                Divider()
+                HorizontalDivider()
                 ListItem(
                     headlineContent = {
                         Row {
@@ -292,7 +307,7 @@ fun SettingsScreen(navigateUp: () -> Unit,
                         showLanguageDialog.value = true
                     },
                 )
-                Divider()
+                HorizontalDivider()
                 ListItem(
                     headlineContent = {
                         Row {
@@ -325,7 +340,7 @@ fun SettingsScreen(navigateUp: () -> Unit,
 
                     },
                 )
-                Divider()
+                HorizontalDivider()
                 ListItem(
                     headlineContent = {
                         Row {

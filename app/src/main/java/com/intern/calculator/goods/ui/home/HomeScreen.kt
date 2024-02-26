@@ -23,10 +23,10 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +41,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,14 +63,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.intern.calculator.goods.R
-import com.intern.calculator.goods.data.Classes.Category
-import com.intern.calculator.goods.data.Classes.Item
-import com.intern.calculator.goods.data.Classes.QuantityUnit
+import com.intern.calculator.goods.data.classes.Category
+import com.intern.calculator.goods.data.classes.Item
+import com.intern.calculator.goods.data.classes.QuantityUnit
 import com.intern.calculator.goods.ui.AppViewModelProvider
 import com.intern.calculator.goods.ui.components.CustomDialog
 import com.intern.calculator.goods.ui.components.MyNavigationDrawerTitle
 import com.intern.calculator.goods.ui.components.MyTopAppBar
-import com.intern.calculator.goods.ui.item.Entry.formatedPrice
+import com.intern.calculator.goods.ui.item.entry.formatedPrice
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
 import com.intern.calculator.goods.ui.settings.SettingsViewModel
 import com.intern.calculator.goods.ui.settings.Theme
@@ -80,11 +79,13 @@ import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 
+// Destination for the home screen
 object HomeDestination : NavigationDestination {
     override val route = "home"
     override val titleRes = R.string.app_name
 }
 
+// Composable function for the HomeScreen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -95,40 +96,44 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val scope = rememberCoroutineScope()
-    // Состояние панели меню
+    // Remember coroutine scope for launching coroutines
+    val coroutineScope = rememberCoroutineScope()
+    // State for drawer
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
+    // Collect user preferences state
     val userPreferences by settingsViewModel.userPreferences.collectAsState(
         initial = UserPreferences(
             Theme.System,
-            settingsViewModel.toLanguage(Locale.getDefault().getLanguage()),
+            settingsViewModel.toLanguage(Locale.getDefault().language),
             1)
     )
 
+    // Collect home UI state
     val homeUiState by viewModel.homeUiState.collectAsState()
+    // Retrieve the application context
     val context = LocalContext.current
 
+    // Menu items
     var menuItems = viewModel.getCategoryList()
 
-    // Активация возможности изменить/удалить списки
+    // State for enabling change/delete lists
     var couldChange by remember { mutableStateOf(false) }
     var couldDelete by remember { mutableStateOf(false) }
-    // Значение, передающееся в модальное окно для изменения/удаления
+    // Values for dialogs
     var oldValue by remember { mutableStateOf("Test") }
     var newValue by remember { mutableStateOf("Test") }
-    // Значение, передающееся в модальное окно для выбора действия
+    // The value passed to the modal window for selecting an action
     var modalAction by remember { mutableIntStateOf(0) }
-    // Открыт/закрыт диалог изменения удаления
+    // State for opening/closing custom dialog
     val openDialogCustom = remember { mutableStateOf(false) }
-    // Открыт/закрыт диалог отмены изменений
+    // State for snackbar
     val snackbarHostState = remember { SnackbarHostState() }
 
     var needReload by remember { mutableStateOf(false) }
 
 
-    // Выбранный элемент в меню
+    // Selected item in the menu
     var selectedItem by remember { mutableIntStateOf(userPreferences.selectedList) }
     LaunchedEffect(key1 = userPreferences) {
         selectedItem = userPreferences.selectedList
@@ -136,7 +141,7 @@ fun HomeScreen(
     viewModel.updateItemListBasedOnId(selectedItem)
     var quantityUnitList = viewModel.getQuantityUnitList()
 
-    // Вызов диалога изменения/удаления
+    // Display dialog for change/delete
     if (openDialogCustom.value) {
         CustomDialog(
             oldValue = oldValue,
@@ -144,7 +149,7 @@ fun HomeScreen(
             onConfirmation = {
                 data-> newValue = data
                 openDialogCustom.value = false
-                scope.launch {
+                coroutineScope.launch {
                     drawerState.apply { close() }
                     val result = snackbarHostState
                         .showSnackbar(
@@ -186,6 +191,8 @@ fun HomeScreen(
                                     }
                                     settingsViewModel.updateSelectedList(selectedItem)
                                     if (filteredList.isEmpty()) {
+                                        viewModel.resetAutoIncrement("t_category")
+                                        viewModel.resetAutoIncrement("t_item")
                                         viewModel.createCategory(
                                             Category(
                                                 id = 0,
@@ -207,11 +214,13 @@ fun HomeScreen(
         )
     }
 
+    // Reload menu items if needed
     if (needReload) {
         menuItems = viewModel.getCategoryList()
         needReload = false
     }
 
+    // Check if menu items and quantity unit list are not empty
     if (menuItems.isNotEmpty() and quantityUnitList.isNotEmpty()) {
         MaterialTheme {
             ModalNavigationDrawer(
@@ -221,21 +230,22 @@ fun HomeScreen(
                         drawerShape = RectangleShape,
                         drawerTonalElevation = Dp(1F),
                         content = {
-                            // Заголовок
+                            // Drawer content
+                            // Navigation drawer title
                             MyNavigationDrawerTitle(
                                 title = context.getString(R.string.nav_drawer_title),
                                 drawerState = drawerState
                             )
-                            // Разделялка
-                            Divider()
-                            // Двигаемый список
+                            // Divider
+                            HorizontalDivider()
+                            // Scrollable column for menu items
                             Column {
                                 LazyColumn(
                                     Modifier
                                         .weight(1f)
                                         .padding(8.dp)) {
                                     items(menuItems) { item ->
-                                        // Каким будет каждый элемент
+                                        // Navigation drawer item
                                         NavigationDrawerItem(
                                             label = { Text(item.name) },
                                             selected = item.id ==
@@ -246,13 +256,13 @@ fun HomeScreen(
                                                     },
                                             onClick = {
                                                 selectedItem = item.id
-                                                scope.launch {
+                                                coroutineScope.launch {
                                                     settingsViewModel.updateSelectedList(selectedItem)
                                                     drawerState.close()
                                                 }
                                             },
                                             badge = {
-                                                // Изменить
+                                                // Edit button
                                                 if (couldChange) {
                                                     IconButton(
                                                         onClick = {
@@ -269,7 +279,7 @@ fun HomeScreen(
                                                         )
                                                     }
                                                 }
-                                                // Удалить
+                                                // Delete button
                                                 if (couldDelete) {
                                                     IconButton(
                                                         onClick = {
@@ -290,7 +300,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                // Нижняя закрепленная строчка
+                                // Bottom row
                                 Box(
                                     Modifier
                                         .fillMaxWidth()
@@ -305,7 +315,7 @@ fun HomeScreen(
                                             .padding(start = 8.dp, end = 8.dp),
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
-                                        // Добавить
+                                        // Add button
                                         Column(Modifier.weight(1f)) {
                                             OutlinedButton(
                                                 onClick = {
@@ -332,7 +342,7 @@ fun HomeScreen(
                                                 )
                                             }
                                         }
-                                        // Изменить
+                                        // Edit button
                                         Column(Modifier.weight(1f)) {
                                             OutlinedButton(
                                                 onClick = {
@@ -356,7 +366,7 @@ fun HomeScreen(
                                                 )
                                             }
                                         }
-                                        // Удалить
+                                        // Delete button
                                         Column(Modifier.weight(1f)) {
                                             OutlinedButton(
                                                 onClick = {
@@ -397,7 +407,7 @@ fun HomeScreen(
                             actionIcon = Icons.Outlined.Settings,
                             actionIconContentDescription = "Action icon",
                             onNavigationClick = {
-                                scope.launch {
+                                coroutineScope.launch {
                                     drawerState.apply {
                                         if (isClosed) open() else close()
                                     }
@@ -422,6 +432,7 @@ fun HomeScreen(
                         }
                     },
                 ) { innerPadding ->
+                    // Body of the screen
                     HomeBody(
                         itemList = homeUiState.itemList,
                         quantityUnitList = quantityUnitList,
@@ -432,7 +443,7 @@ fun HomeScreen(
                             .padding(4.dp)
                             .fillMaxSize(),
                         onClick = {
-                            scope.launch {
+                            coroutineScope.launch {
                                 drawerState.apply {
                                     if (isClosed) open() else close()
                                 }
@@ -443,6 +454,7 @@ fun HomeScreen(
             }
         }
     }
+    // If menu items or quantity unit list are empty, display loading indicator
     else {
         menuItems = viewModel.getCategoryList()
         quantityUnitList = viewModel.getQuantityUnitList()
@@ -457,7 +469,7 @@ fun HomeScreen(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+// Composable function for the body of the screen
 @Composable
 private fun HomeBody(
     itemList: List<Item>,
@@ -494,6 +506,7 @@ private fun HomeBody(
                 )
             }
         }
+        // Display message if item list is empty, otherwise display item list
         if (itemList.isEmpty()) {
             Text(
                 text = stringResource(R.string.no_item_description),
@@ -511,6 +524,7 @@ private fun HomeBody(
     }
 }
 
+// Composable function for displaying inventory list
 @Composable
 private fun InventoryList(
     itemList: List<Item>,
@@ -518,6 +532,7 @@ private fun InventoryList(
     onItemClick: (Item) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Find item with the lowest price per unit
     val best = itemList.minBy { item -> ((item.price/item.quantity)
         *quantityUnitList.first { it.id == item.quantityType }.multiplier) }
     LazyColumn(modifier = modifier) {
@@ -540,6 +555,7 @@ private fun InventoryList(
     }
 }
 
+// Composable function for displaying inventory item
 @Composable
 private fun InventoryItem(
     item: Item,
@@ -571,7 +587,6 @@ private fun InventoryItem(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-//                Spacer(Modifier.weight(1f))
                 Column (
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.End,

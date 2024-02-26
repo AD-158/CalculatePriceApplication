@@ -4,6 +4,7 @@ import android.app.Application
 import com.intern.calculator.goods.data.AppContainer
 import com.intern.calculator.goods.data.AppDataContainer
 
+// Define the application class which extends Application
 class CalculatePriceApplication : Application() {
 
     /**
@@ -11,6 +12,7 @@ class CalculatePriceApplication : Application() {
      */
     lateinit var container: AppContainer
 
+    // Override the onCreate method to initialize the AppContainer instance
     override fun onCreate() {
         super.onCreate()
         container = AppDataContainer(this)

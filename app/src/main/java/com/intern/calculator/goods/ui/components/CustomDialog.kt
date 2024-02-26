@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -27,6 +26,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.intern.calculator.goods.R
 
+/**
+ * Composable function to display a custom dialog.
+ * @param oldValue The value to display in the dialog.
+ * @param neededAction An integer representing the type of action needed.
+ * @param onConfirmation Callback function triggered when the confirmation button is clicked.
+ * @param onCancel Callback function triggered when the cancel button is clicked.
+ */
 @Composable
 fun CustomDialog(
     oldValue: String,
@@ -44,6 +50,14 @@ fun CustomDialog(
     }
 }
 
+/**
+ * Composable function to define the UI of a custom dialog.
+ * @param modifier Modifier for styling.
+ * @param oldValue The value to display in the dialog.
+ * @param neededAction An integer representing the type of action needed.
+ * @param onConfirmation Callback function triggered when the confirmation button is clicked.
+ * @param onCancel Callback function triggered when the cancel button is clicked.
+ */
 @Composable
 fun CustomDialogUI(
     modifier: Modifier = Modifier,
@@ -52,12 +66,12 @@ fun CustomDialogUI(
     onConfirmation: (String) -> Unit,
     onCancel: () -> Unit,
 ) {
-    var newValue by remember {
-        mutableStateOf("")
-    }
+    // State to hold the new value entered by the user
+    var newValue by remember { mutableStateOf("") }
+
+    // Card to contain the dialog content
     Card(
         shape = MaterialTheme.shapes.medium,
-//         modifier = modifier.size(280.dp, 240.dp)
         modifier = Modifier.padding(10.dp, 5.dp, 10.dp, 10.dp),
     ) {
         Column(modifier.background(MaterialTheme.colorScheme.surface)) {
@@ -67,6 +81,7 @@ fun CustomDialogUI(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Title text based on the needed action
                 Text(
                     text = when (neededAction) {
                         0 -> stringResource(R.string.nav_drawer_modal_action_0_title)
@@ -81,6 +96,7 @@ fun CustomDialogUI(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                // Display an input field if neededAction is 0 or 1
                 if ((neededAction == 0) or (neededAction == 1)) {
                     OutlinedTextField(
                         value = newValue,
@@ -96,6 +112,7 @@ fun CustomDialogUI(
                         },
                     )
                 }
+                // Display additional text based on the needed action
                 Text(
                     text = when (neededAction) {
                         0 -> stringResource(R.string.nav_drawer_modal_action_0_text)
@@ -109,6 +126,7 @@ fun CustomDialogUI(
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
+            // Row containing cancel and confirmation buttons
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -116,9 +134,11 @@ fun CustomDialogUI(
                     .background(MaterialTheme.colorScheme.surface),
                 horizontalArrangement = Arrangement.SpaceAround,
             ) {
-                TextButton(onClick = {
-                    onCancel()
-                }, Modifier.fillMaxWidth().weight(1f)) {
+                // Cancel button
+                TextButton(
+                    onClick = { onCancel() },
+                    modifier = Modifier.fillMaxWidth().weight(1f)
+                ) {
                     Text(
                         text = stringResource(R.string.nav_drawer_modal_action_cancel_text),
                         fontWeight = FontWeight.Bold,
@@ -126,9 +146,11 @@ fun CustomDialogUI(
                         modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)
                     )
                 }
-                TextButton(onClick = {
-                    onConfirmation(newValue)
-                }, Modifier.fillMaxWidth().weight(1f)) {
+                // Confirmation button
+                TextButton(
+                    onClick = { onConfirmation(newValue) },
+                    modifier = Modifier.fillMaxWidth().weight(1f)
+                ) {
                     Text(
                         text = stringResource(when (neededAction) {
                             0 -> R.string.nav_drawer_modal_action_0_title

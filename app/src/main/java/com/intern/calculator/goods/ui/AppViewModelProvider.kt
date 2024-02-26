@@ -7,12 +7,14 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.intern.calculator.goods.CalculatePriceApplication
 import com.intern.calculator.goods.ui.home.HomeViewModel
-import com.intern.calculator.goods.ui.item.Details.ItemDetailsViewModel
-import com.intern.calculator.goods.ui.item.Edit.ItemEditViewModel
-import com.intern.calculator.goods.ui.item.Entry.ItemEntryViewModel
+import com.intern.calculator.goods.ui.item.details.ItemDetailsViewModel
+import com.intern.calculator.goods.ui.item.edit.ItemEditViewModel
+import com.intern.calculator.goods.ui.item.entry.ItemEntryViewModel
 import com.intern.calculator.goods.ui.settings.SettingsViewModel
 
+// Object to provide view model instances using ViewModelFactory
 object AppViewModelProvider {
+    // Factory instance for creating view models
     val Factory = viewModelFactory {
         // Initializer for HomeViewModel
         initializer {

@@ -17,6 +17,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.intern.calculator.goods.R
 import java.util.Calendar
 
+/**
+ * Composable function to display a custom top app bar.
+ * @param title The title text to be displayed.
+ * @param modifier Modifier for styling.
+ * @param navigationIcon The icon for the navigation button.
+ * @param navigationIconContentDescription The content description for the navigation button.
+ * @param actionIcon The icon for the action button.
+ * @param actionIconContentDescription The content description for the action button.
+ * @param onNavigationClick Callback function triggered when the navigation button is clicked.
+ * @param onActionClick Callback function triggered when the action button is clicked.
+ * @param colors Custom colors for the top app bar.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTopAppBar(
@@ -35,10 +47,11 @@ fun MyTopAppBar(
         actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     ),
 ) {
+    // Determine the appropriate greeting based on the current time
     var greeting = 0
     if (title.isNullOrBlank())
     {
-        // Получение системного времени
+        // Getting the system time
         greeting = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
             in 4..11 -> R.string.main_appbar_greeting_1
             in 12..16 -> R.string.main_appbar_greeting_2
@@ -47,7 +60,9 @@ fun MyTopAppBar(
         }
     }
 
+    // Composable for the center-aligned top app bar
     CenterAlignedTopAppBar(
+        // Display the title text or the greeting if the title is blank
         title = {
             Text(
                 text = if (title.isNullOrBlank()) {
@@ -59,6 +74,7 @@ fun MyTopAppBar(
                 overflow = TextOverflow.Ellipsis
             )
         },
+        // Display the navigation icon button if provided
         navigationIcon = {
             if (navigationIcon != null) {
                 IconButton(onClick = onNavigationClick) {
@@ -70,6 +86,7 @@ fun MyTopAppBar(
                 }
             }
         },
+        // Display the action icon button if provided
         actions = {
             if (actionIcon != null) {
                 IconButton(onClick = onActionClick) {
@@ -81,7 +98,8 @@ fun MyTopAppBar(
                 }
             }
         },
-        modifier = modifier.testTag("MyTopAppBar"),
+        modifier = modifier,
+        // Apply custom colors for the top app bar
         colors = colors,
     )
 }
