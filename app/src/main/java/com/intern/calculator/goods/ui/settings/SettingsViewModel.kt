@@ -41,4 +41,9 @@ class SettingsViewModel(private val repository: UserPreferencesRepository) : Vie
     suspend fun updateSelectedList(listNumber: Int) {
         repository.updateSelectedList(listNumber)
     }
+
+    // Function to update the duration
+    suspend fun updateDuration(duration: Long) {
+        repository.updateDuration(duration)
+    }
 }

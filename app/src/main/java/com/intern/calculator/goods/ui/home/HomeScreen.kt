@@ -75,6 +75,7 @@ import com.intern.calculator.goods.ui.navigation.NavigationDestination
 import com.intern.calculator.goods.ui.settings.SettingsViewModel
 import com.intern.calculator.goods.ui.settings.Theme
 import com.intern.calculator.goods.ui.settings.UserPreferences
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -106,7 +107,8 @@ fun HomeScreen(
         initial = UserPreferences(
             Theme.System,
             settingsViewModel.toLanguage(Locale.getDefault().language),
-            1)
+            1,
+            4000L)
     )
 
     // Collect home UI state
@@ -150,20 +152,28 @@ fun HomeScreen(
                 data-> newValue = data
                 openDialogCustom.value = false
                 coroutineScope.launch {
-                    drawerState.apply { close() }
-                    val result = snackbarHostState
-                        .showSnackbar(
-                            message = when (modalAction) {
-                                0 -> context.getString(R.string.snackbar_text_action_0)
-                                1 -> context.getString(R.string.snackbar_text_action_1)
-                                else -> context.getString(R.string.snackbar_text_action_2)
-                            },
-                            actionLabel = context.getString(R.string.nav_drawer_modal_action_cancel_text),
-                            duration = SnackbarDuration.Short
-                        )
+                    // Launch a coroutine to wait for duration
+                    if (userPreferences.duration != 0L) {
+                        drawerState.apply { close() }
+                    }
+                    launch {
+                        delay(userPreferences.duration)
+                        snackbarHostState.currentSnackbarData?.dismiss()
+                    }
+
+                    // Launch a coroutine to wait for the result of the Snackbar
+                    val result = snackbarHostState.showSnackbar(
+                        message = when (modalAction) {
+                            0 -> context.getString(R.string.snackbar_text_action_0)
+                            1 -> context.getString(R.string.snackbar_text_action_1)
+                            else -> context.getString(R.string.snackbar_text_action_2)
+                        },
+                        actionLabel = context.getString(R.string.nav_drawer_modal_action_cancel_text),
+                        duration = SnackbarDuration.Indefinite,
+                    )
                     when (result) {
                         SnackbarResult.ActionPerformed -> {
-                            drawerState.apply { open()  }
+                            drawerState.apply { open() }
                         }
                         SnackbarResult.Dismissed -> {
                             when (modalAction) {
@@ -547,7 +557,6 @@ private fun InventoryList(
                     MaterialTheme.colorScheme.primary
                 }
                 else {
-
                     MaterialTheme.colorScheme.surface
                 }
             )

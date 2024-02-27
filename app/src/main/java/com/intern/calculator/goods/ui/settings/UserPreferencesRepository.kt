@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.intern.calculator.goods.R
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +24,7 @@ data class UserPreferences(
     val theme: Theme,
     val language: Language,
     val selectedList: Int,
+    val duration: Long,
 )
 
 // Enum representing different theme options
@@ -49,6 +51,7 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         val THEME_KEY = stringPreferencesKey("theme")
         val LANGUAGE_KEY = stringPreferencesKey("language")
         val SELECTED_LIST_KEY = intPreferencesKey("selectedList")
+        val DURATION_KEY = longPreferencesKey("duration")
     }
 
     // Flow to observe user preferences changes
@@ -85,6 +88,13 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         }
     }
 
+    // Function to update the duration preference
+    suspend fun updateDuration(duration: Long) {
+        updatePreferences { preferences ->
+            preferences[PreferencesKeys.DURATION_KEY] = duration
+        }
+    }
+
     // Function to update preferences in the DataStore
     private suspend fun updatePreferences(update: suspend (MutablePreferences) -> Unit) {
         dataStore.edit { preferences ->
@@ -98,6 +108,7 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         val language = preferences[PreferencesKeys.LANGUAGE_KEY]?.let { Language.valueOf(it) }
             ?: toLanguage(Locale.getDefault().language)
         val selectedList = preferences[PreferencesKeys.SELECTED_LIST_KEY] ?: 1
+        val duration = preferences[PreferencesKeys.DURATION_KEY] ?: 4000L
 
         // Set application locale based on selected language
         val locale = when (language) {
@@ -106,7 +117,12 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         }
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(locale))
 
-        return UserPreferences(theme = theme, language = language, selectedList = selectedList)
+        return UserPreferences(
+            theme = theme,
+            language = language,
+            selectedList = selectedList,
+            duration = duration
+        )
     }
 
     // Function to convert locale string to Language enum

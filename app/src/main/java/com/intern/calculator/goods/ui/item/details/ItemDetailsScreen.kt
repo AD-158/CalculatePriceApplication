@@ -53,7 +53,12 @@ import com.intern.calculator.goods.ui.components.MyTopAppBar
 import com.intern.calculator.goods.ui.item.entry.formatedPrice
 import com.intern.calculator.goods.ui.item.entry.toItem
 import com.intern.calculator.goods.ui.navigation.NavigationDestination
+import com.intern.calculator.goods.ui.settings.SettingsViewModel
+import com.intern.calculator.goods.ui.settings.Theme
+import com.intern.calculator.goods.ui.settings.UserPreferences
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 // Destination for the item details screen
 object ItemDetailsDestination : NavigationDestination {
@@ -283,11 +288,20 @@ private fun DeleteConfirmationDialog(
     openDialogCustom: MutableState<Boolean>,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
+    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     // Remember coroutine scope for launching coroutines
     val coroutineScope = rememberCoroutineScope()
     // Retrieve the application context
     val context = LocalContext.current
+    // Collect user preferences state
+    val userPreferences by settingsViewModel.userPreferences.collectAsState(
+        initial = UserPreferences(
+            Theme.System,
+            settingsViewModel.toLanguage(Locale.getDefault().language),
+            1,
+            4000L)
+    )
     if (openDialogCustom.value) {
         CustomDialog(
             oldValue = item.name,
@@ -295,12 +309,15 @@ private fun DeleteConfirmationDialog(
             onConfirmation = {
                 openDialogCustom.value = false
                 coroutineScope.launch {
+                    launch {
+                        delay(userPreferences.duration)
+                        snackbarHostState.currentSnackbarData?.dismiss()
+                    }
                     val result = snackbarHostState
                         .showSnackbar(
                             message = context.getString(R.string.snackbar_text_action_2),
                             actionLabel = context.getString(R.string.nav_drawer_modal_action_cancel_text),
-                            // Defaults to SnackbarDuration.Short
-                            duration = SnackbarDuration.Short
+                            duration = SnackbarDuration.Indefinite
                         )
                     when (result) {
                         SnackbarResult.ActionPerformed -> {

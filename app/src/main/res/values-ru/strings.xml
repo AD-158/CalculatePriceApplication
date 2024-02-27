@@ -58,4 +58,9 @@
     <string name="about_time">"от "</string>
     <string name="setting_mail_subject">Обратная связь о вашем приложении</string>
     <string name="setting_mail_message">Напишите свой отзыв здесь…</string>
+    <string name="about_source_link">Просмотр исходного кода программы</string>
+    <string name="setting_duration">Время показа всплывающего окна</string>
+    <string name="setting_duration_title">Время, в течение которого будет отображаться всплывающее окно с возможностью отмены добавления, изменения или удаления</string>
+    <string name="setting_duration_reset">По-умолчанию</string>
+    <string name="setting_duration_value">" сек"</string>
 </resources>

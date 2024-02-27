@@ -97,7 +97,8 @@ fun GoodsTheme(
         initial = UserPreferences(
             Theme.System,
             viewModel.toLanguage(Locale.getDefault().language),
-            1)
+            1,
+            4000L)
     )
 
     // Determine color scheme based on user preferences

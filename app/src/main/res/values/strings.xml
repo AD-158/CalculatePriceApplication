@@ -57,4 +57,9 @@
     <string name="about_time">"from "</string>
     <string name="setting_mail_subject">Feedback on Your App</string>
     <string name="setting_mail_message">Write your feedback here…</string>
+    <string name="about_source_link">View the source code for the program.</string>
+    <string name="setting_duration">The time of display of the pop-up window</string>
+    <string name="setting_duration_title">The time during which the pop-up window will be displayed with the option to cancel the addition, change or delete</string>
+    <string name="setting_duration_reset">Reset to default</string>
+    <string name="setting_duration_value">" sec"</string>
 </resources>
