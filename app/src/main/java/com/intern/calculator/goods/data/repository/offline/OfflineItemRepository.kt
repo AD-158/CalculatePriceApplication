@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 class OfflineItemsRepository(private val itemDao: ItemDAO) : ItemsRepository {
     // Get a flow of all items for a given category ID from the local database
-    override fun getAllItemsForListSteam(id: Int): Flow<List<Item>> = itemDao.getAllItemsForList(id)
+    override fun getAllItemsForListStream(id: Int): Flow<List<Item>> = itemDao.getAllItemsForList(id)
 
     // Get a flow of all items from the local database
     override fun getAllItemsStream(): Flow<List<Item>> = itemDao.getAllItems()

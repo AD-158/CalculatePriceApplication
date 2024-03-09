@@ -19,38 +19,40 @@ object AppViewModelProvider {
         // Initializer for HomeViewModel
         initializer {
             HomeViewModel(
-                CalculatePriceApplication().container.itemsRepository,
-                CalculatePriceApplication().container.quantityRepository,
-                CalculatePriceApplication().container.categoryRepository,
+                itemsRepository = CalculatePriceApplication().container.itemsRepository,
+                categoryRepository = CalculatePriceApplication().container.categoryRepository,
+                quantityUnitRepository = CalculatePriceApplication().container.quantityRepository,
             )
         }
         // Initializer for ItemEntryViewModel
         initializer {
             ItemEntryViewModel(
-                CalculatePriceApplication().container.itemsRepository,
-                CalculatePriceApplication().container.quantityRepository,
+                itemsRepository = CalculatePriceApplication().container.itemsRepository,
+                quantityUnitRepository = CalculatePriceApplication().container.quantityRepository,
             )
         }
         // Initializer for ItemDetailsViewModel
         initializer {
             ItemDetailsViewModel(
-                this.createSavedStateHandle(),
-                CalculatePriceApplication().container.itemsRepository,
-                CalculatePriceApplication().container.quantityRepository,
+                savedStateHandle = this.createSavedStateHandle(),
+                itemsRepository = CalculatePriceApplication().container.itemsRepository,
+                quantityUnitRepository = CalculatePriceApplication().container.quantityRepository,
             )
         }
         // Initializer for ItemEditViewModel
         initializer {
             ItemEditViewModel(
-                this.createSavedStateHandle(),
-                CalculatePriceApplication().container.itemsRepository,
-                CalculatePriceApplication().container.quantityRepository,
+                savedStateHandle = this.createSavedStateHandle(),
+                itemsRepository = CalculatePriceApplication().container.itemsRepository,
+                quantityUnitRepository = CalculatePriceApplication().container.quantityRepository,
             )
         }
         // Initializer for SettingsViewModel
         initializer {
             SettingsViewModel(
                 repository = CalculatePriceApplication().container.settingsRepository,
+                categoryRepository = CalculatePriceApplication().container.categoryRepository,
+                itemRepository = CalculatePriceApplication().container.itemsRepository,
             )
         }
     }

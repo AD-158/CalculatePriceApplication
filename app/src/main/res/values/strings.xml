@@ -62,4 +62,8 @@
     <string name="setting_duration_title">The time during which the pop-up window will be displayed with the option to cancel the addition, change or delete</string>
     <string name="setting_duration_reset">Reset to default</string>
     <string name="setting_duration_value">" sec"</string>
+    <string name="setting_export_title">Export all data</string>
+    <string name="setting_export_to_file">Export data to file</string>
+    <string name="setting_export_send_file">Export the data and send it</string>
+    <string name="setting_successful_export">File saved locally</string>
 </resources>

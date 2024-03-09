@@ -13,8 +13,8 @@ android {
         applicationId = "com.intern.calculator.goods"
         minSdk = 21
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -72,6 +72,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // Testing
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

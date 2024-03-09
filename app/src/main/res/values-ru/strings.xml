@@ -63,4 +63,8 @@
     <string name="setting_duration_title">Время, в течение которого будет отображаться всплывающее окно с возможностью отмены добавления, изменения или удаления</string>
     <string name="setting_duration_reset">По-умолчанию</string>
     <string name="setting_duration_value">" сек"</string>
+    <string name="setting_export_title">Экспортировать данные</string>
+    <string name="setting_export_to_file">Экспортировать данные в файл</string>
+    <string name="setting_export_send_file">Экспортировать данные в файл и отправить их</string>
+    <string name="setting_successful_export">Файл сохранен</string>
 </resources>

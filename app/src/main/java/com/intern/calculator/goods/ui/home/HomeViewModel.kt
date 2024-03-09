@@ -54,7 +54,7 @@ class HomeViewModel(
     // Function to update HomeUiState itemList based on the result of getAllItemsForListSteam
     fun updateItemListBasedOnId(id: Int) {
         viewModelScope.launch {
-            itemsRepository.getAllItemsForListSteam(id).collect { newList ->
+            itemsRepository.getAllItemsForListStream(id).collect { newList ->
                 // Update the HomeUiState with the new list of items
                 val newUiState = HomeUiState(newList)
                 _homeUiState.value = newUiState
