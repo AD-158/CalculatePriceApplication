@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowRightAlt
 import androidx.compose.material.icons.automirrored.outlined.Message
+import androidx.compose.material.icons.outlined.ArrowCircleDown
 import androidx.compose.material.icons.outlined.ArrowCircleUp
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Info
@@ -121,7 +122,7 @@ fun SettingsScreen(navigateUp: () -> Unit,
     }
 
     // Export dialog
-    val launcher = rememberLauncherForActivityResult(
+    val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
         uri?.let {
@@ -132,15 +133,32 @@ fun SettingsScreen(navigateUp: () -> Unit,
                 )
                 viewModel.putJsonToFile(context = context, uri = uri, jsonData = jsonStr)
             }
-            Toast.makeText(context, context.getString(R.string.setting_successful_export), Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.setting_export_successful), Toast.LENGTH_SHORT).show()
         }
     }
     if (showExportDialog.value) {
         ExportDialog(
             showExportDialog = showExportDialog, categories = categories, items = items,
-            launcher = launcher, viewModel = viewModel, context = context,
+            launcher = exportLauncher, viewModel = viewModel, context = context,
         )
     }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let {
+            coroutineScope.launch {
+                try {
+                    viewModel.importDataFromJson(context = context, uri = uri)
+                    Toast.makeText(context, context.getString(R.string.setting_import_successful), Toast.LENGTH_SHORT).show()
+
+                } catch (_: Error) {
+                    Toast.makeText(context, context.getString(R.string.setting_import_error), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
 
     Scaffold(
         topBar = {
@@ -237,6 +255,22 @@ fun SettingsScreen(navigateUp: () -> Unit,
                     },
                     modifier = Modifier.clickable {
                         showExportDialog.value = true
+                    },
+                )
+                HorizontalDivider()
+                ListItem(
+                    headlineContent = {
+                        Row {
+                            Icon(
+                                imageVector = Icons.Outlined.ArrowCircleDown,
+                                contentDescription = stringResource(id = R.string.setting_import_title),
+                                modifier = Modifier.padding(end = 2.dp)
+                            )
+                            Text(text = stringResource(id = R.string.setting_import_title))
+                        }
+                    },
+                    modifier = Modifier.clickable {
+                        importLauncher.launch(arrayOf("application/json"))
                     },
                 )
                 HorizontalDivider()

@@ -10,7 +10,7 @@ class OfflineCategoryRepository(private val categoryDao: CategoryDAO) : Category
     override fun getAllCategoriesStream(): Flow<List<Category>> = categoryDao.getAllCategories()
 
     // Get a flow of a specific category by its name from the local database
-    override fun getCategoryStream(name: String): Flow<Category?> = categoryDao.getCategory(name)
+    override suspend fun getCategory(name: String): Category? = categoryDao.getCategory(name)
 
     // Insert a new category into the local database
     override suspend fun insertCategory(category: Category) = categoryDao.insert(category)

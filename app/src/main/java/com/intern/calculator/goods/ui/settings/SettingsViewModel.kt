@@ -5,12 +5,14 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.intern.calculator.goods.data.classes.Category
 import com.intern.calculator.goods.data.classes.Item
 import com.intern.calculator.goods.data.repository.online.CategoryRepository
 import com.intern.calculator.goods.data.repository.online.ItemsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -19,8 +21,8 @@ import org.json.JSONObject
 // Define the SettingsViewModel class which extends ViewModel
 class SettingsViewModel(
     private val repository: UserPreferencesRepository,
-    categoryRepository: CategoryRepository,
-    itemRepository: ItemsRepository,
+    val categoryRepository: CategoryRepository,
+    val itemRepository: ItemsRepository,
 ) : ViewModel() {
 
     // Flow to observe user preferences
@@ -119,5 +121,50 @@ class SettingsViewModel(
             jsonArray.put(jsonObject)
         }
         return jsonArray
+    }
+
+    // Function to import data from json
+    suspend fun importDataFromJson(
+        context: Context,
+        uri: Uri
+    ) {
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val jsonData = inputStream?.bufferedReader().use { it?.readText() }
+        val map: MutableMap<Int, Int> = mutableMapOf()
+
+        jsonData?.let {
+            val jsonObject = JSONObject(it)
+            val categoriesArray = jsonObject.getJSONArray("categories")
+            val itemsArray = jsonObject.getJSONArray("items")
+            viewModelScope.launch {
+                for (i in 0 until categoriesArray.length()) {
+                    val categoryObject = categoriesArray.getJSONObject(i)
+                    val name = categoryObject.getString("name")
+                    val oldCategoryId = categoryObject.getInt("id")
+                    categoryRepository.insertCategory(Category(name = name))
+                    val newCategoryId = categoryRepository.getCategory(name)?.id ?: 1
+                    map[oldCategoryId] = newCategoryId
+                }
+
+                for (i in 0 until itemsArray.length()) {
+                    val itemObject = itemsArray.getJSONObject(i)
+                    val name = itemObject.getString("name")
+                    val price = itemObject.getDouble("price")
+                    val quantity = itemObject.getDouble("quantity")
+                    val oldCategoryId = itemObject.getInt("categoryId")
+                    val newCategoryId = map[oldCategoryId] ?: 1
+                    val quantityTypeId = itemObject.getInt("quantityTypeId")
+
+                    val item = Item(
+                        name = name,
+                        price = price,
+                        quantity = quantity,
+                        aList = newCategoryId,
+                        quantityType = quantityTypeId
+                    )
+                    itemRepository.insertItem(item)
+                }
+            }
+        }
     }
 }

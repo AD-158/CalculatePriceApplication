@@ -66,5 +66,8 @@
     <string name="setting_export_title">Экспортировать данные</string>
     <string name="setting_export_to_file">Экспортировать данные в файл</string>
     <string name="setting_export_send_file">Экспортировать данные в файл и отправить их</string>
-    <string name="setting_successful_export">Файл сохранен</string>
+    <string name="setting_export_successful">Файл сохранен</string>
+    <string name="setting_import_title">Импортировать данные</string>
+    <string name="setting_import_successful">Данные были успешно импортированы</string>
+    <string name="setting_import_error">Произошла ошибка при импорте данных</string>
 </resources>
